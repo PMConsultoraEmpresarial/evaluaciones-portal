@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Administrador - Prototipo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #F3F4F6;
+            color: #1F2937;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            background: #1F2937;
+            padding: 16px;
+            border-right: 1px solid #E5E7EB;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-title {
+            font-weight: 600;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar-btn {
+            background: transparent;
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 6px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .sidebar-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-btn.active {
+            background: #2563EB;
+        }
+
+        /* MAIN CONTENT */
+        .main {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        .header {
+            background: white;
+            padding: 16px 32px;
+            border-bottom: 1px solid #E5E7EB;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1F2937;
+        }
+
+        .header-user {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .header-user span {
+            font-size: 14px;
+            color: #6B7280;
+        }
+
+        .header-user button {
+            background: transparent;
+            border: none;
+            color: #EF4444;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* CONTENT */
+        .content {
+            padding: 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* GRID LAYOUT */
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #E5E7EB;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #6B7280;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: 600;
+        }
+
+        /* CARD GRID */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #E5E7EB;
+            cursor: pointer;
+            transition: box-shadow 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1F2937;
+            margin-bottom: 8px;
+        }
+
+        .card-description {
+            font-size: 13px;
+            color: #6B7280;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .card-meta {
+            font-size: 12px;
+            color: #6B7280;
+            margin-bottom: 8px;
+        }
+
+        .card-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: #2563EB;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: white;
+            border: 1px solid #D1D5DB;
+            color: #1F2937;
+        }
+
+        .btn-secondary:hover {
+            background: #F3F4F6;
+        }
+
+        .btn-tertiary {
+            background: transparent;
+            border: none;
+            color: #2563EB;
+            padding: 6px 12px;
+        }
+
+        .btn-danger {
+            color: #EF4444;
+        }
+
+        /* TABLE */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #E5E7EB;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            font-size: 14px;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #F3F4F6;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #6B7280;
+            font-size: 12px;
+        }
+
+        td {
+            padding: 12px 16px;
+            color: #1F2937;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        tbody tr:hover {
+            background: #F9FAFB;
+        }
+
+        /* BADGE */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: #DCFCE7;
+            color: #166534;
+        }
+
+        .badge-warning {
+            background: #FEF3C7;
+            color: #92400e;
+        }
+
+        .badge-gray {
+            background: #F3F4F6;
+            color: #6B7280;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 32px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1F2937;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6B7280;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-size: 13px;
+            color: #6B7280;
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="date"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #2563EB;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .checkbox-group {
+            border: 1px solid #E5E7EB;
+            border-radius: 6px;
+            padding: 12px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .checkbox-item {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #F3F4F6;
+        }
+
+        .checkbox-item:last-child {
+            border-bottom: none;
+        }
+
+        .checkbox-item input {
+            cursor: pointer;
+            width: auto;
+        }
+
+        .checkbox-label {
+            font-size: 14px;
+            color: #1F2937;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .checkbox-meta {
+            font-size: 12px;
+            color: #6B7280;
+        }
+
+        /* INDICADORES */
+        .indicator-box {
+            border: 1px solid #E5E7EB;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .indicator-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1F2937;
+            margin-bottom: 8px;
+        }
+
+        .indicator-description {
+            font-size: 13px;
+            color: #6B7280;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .radio-label input {
+            width: auto;
+            cursor: pointer;
+        }
+
+        /* SEARCH */
+        .search-box {
+            margin-bottom: 24px;
+        }
+
+        .search-box input {
+            width: 300px;
+        }
+
+        /* BUTTON GROUP */
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .button-group .btn {
+            flex: 1;
+        }
+
+        /* FILTER BAR */
+        .filter-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+            align-items: end;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1F2937;
+            margin: 0;
+        }
+
+        .color-success { color: #10B981; }
+        .color-warning { color: #F59E0B; }
+        .color-danger { color: #EF4444; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-title">Portal Admin</div>
+        <div class="sidebar-menu">
+            <button class="sidebar-btn active" onclick="switchScreen('dashboard')">📊 Dashboard</button>
+            <button class="sidebar-btn" onclick="switchScreen('evaluaciones')">📋 Evaluaciones</button>
+            <button class="sidebar-btn" onclick="switchScreen('practicantes')">👥 Practicantes</button>
+            <button class="sidebar-btn" onclick="switchScreen('resultados')">📈 Resultados</button>
+            <button class="sidebar-btn" onclick="switchScreen('config')">⚙️ Configuración</button>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-title" id="pageTitle">Dashboard</div>
+            <div class="header-user">
+                <span>admin@example.com</span>
+                <button>Cerrar sesión</button>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- DASHBOARD SCREEN -->
+            <div id="dashboard" class="screen active">
+                <div class="metric-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Evaluaciones Activas</div>
+                        <div class="metric-value color-warning">6</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Practicantes Totales</div>
+                        <div class="metric-value color-success">24</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Pendientes de Respuesta</div>
+                        <div class="metric-value color-warning">8</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Calificadas</div>
+                        <div class="metric-value color-success">32</div>
+                    </div>
+                </div>
+
+                <div class="table-container" style="margin-top: 32px;">
+                    <div style="background: #F3F4F6; padding: 16px; border-bottom: 1px solid #E5E7EB;">
+                        <h3 style="margin: 0; font-size: 16px; font-weight: 600;">Evaluaciones Recientes</h3>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Evaluación</th>
+                                <th>Preguntas</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Evaluación Técnica</td>
+                                <td>15 preguntas</td>
+                                <td><span class="badge badge-success">Activa</span></td>
+                            </tr>
+                            <tr>
+                                <td>Evaluación de Competencias</td>
+                                <td>12 preguntas</td>
+                                <td><span class="badge badge-success">Activa</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- EVALUACIONES SCREEN -->
+            <div id="evaluaciones" class="screen">
+                <div class="page-header">
+                    <h2 class="page-title">Gestión de Evaluaciones</h2>
+                    <button class="btn btn-primary">+ Nueva Evaluación</button>
+                </div>
+
+                <div class="card-grid">
+                    <div class="card" onclick="openModal('share')">
+                        <div class="card-title">✔ Evaluación Técnica</div>
+                        <p class="card-description">Evaluación de habilidades técnicas y conocimientos especializados.</p>
+                        <div class="card-meta">Preguntas: 15</div>
+                        <div class="card-meta">Creada: 12 ago 2024</div>
+                        <div class="card-buttons">
+                            <button class="btn btn-secondary">Editar</button>
+                            <button class="btn btn-secondary" onclick="openModal('share'); event.stopPropagation();">Compartir</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">✔ Evaluación de Competencias</div>
+                        <p class="card-description">Evaluación de competencias blandas y transversales.</p>
+                        <div class="card-meta">Preguntas: 12</div>
+                        <div class="card-meta">Creada: 10 ago 2024</div>
+                        <div class="card-buttons">
+                            <button class="btn btn-secondary">Editar</button>
+                            <button class="btn btn-secondary" onclick="openModal('share'); event.stopPropagation();">Compartir</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">✔ Evaluación Comercial</div>
+                        <p class="card-description">Evaluación de habilidades comerciales y negociación.</p>
+                        <div class="card-meta">Preguntas: 10</div>
+                        <div class="card-meta">Creada: 08 ago 2024</div>
+                        <div class="card-buttons">
+                            <button class="btn btn-secondary">Editar</button>
+                            <button class="btn btn-secondary" onclick="openModal('share'); event.stopPropagation();">Compartir</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRACTICANTES SCREEN -->
+            <div id="practicantes" class="screen">
+                <div class="page-header">
+                    <h2 class="page-title">Seguimiento de Practicantes</h2>
+                </div>
+
+                <div class="search-box">
+                    <input type="text" placeholder="Buscar practicante por nombre..." onkeyup="filterTable(this.value)">
+                </div>
+
+                <div class="table-container">
+                    <table id="practitionersTable">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th style="text-align: center;">Pendientes</th>
+                                <th style="text-align: center;">Respondidas</th>
+                                <th style="text-align: center;">Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>María Gómez</td>
+                                <td>maria.gomez@email.com</td>
+                                <td style="text-align: center;">2</td>
+                                <td style="text-align: center;">8</td>
+                                <td style="text-align: center;"><span class="badge badge-success">Activo</span></td>
+                                <td><button class="btn btn-tertiary" onclick="switchScreen('calificar')">Calificar</button> <button class="btn btn-tertiary">Ver respuestas</button></td>
+                            </tr>
+                            <tr>
+                                <td>Juan Pérez</td>
+                                <td>juan.perez@email.com</td>
+                                <td style="text-align: center;">1</td>
+                                <td style="text-align: center;">12</td>
+                                <td style="text-align: center;"><span class="badge badge-success">Activo</span></td>
+                                <td><button class="btn btn-tertiary" onclick="switchScreen('calificar')">Calificar</button> <button class="btn btn-tertiary">Ver respuestas</button></td>
+                            </tr>
+                            <tr>
+                                <td>Marina López</td>
+                                <td>marina.lopez@email.com</td>
+                                <td style="text-align: center;">3</td>
+                                <td style="text-align: center;">5</td>
+                                <td style="text-align: center;"><span class="badge badge-gray">Inactivo</span></td>
+                                <td><button class="btn btn-tertiary" onclick="switchScreen('calificar')">Calificar</button> <button class="btn btn-tertiary">Ver respuestas</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CALIFICAR SCREEN -->
+            <div id="calificar" class="screen">
+                <div class="page-header">
+                    <h2 class="page-title">Calificación de Evaluación</h2>
+                </div>
+
+                <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid #E5E7EB; margin-bottom: 24px;">
+                    <div style="font-size: 14px; color: #6B7280;">
+                        Practicante: <strong>María Gómez</strong> | Evaluación: <strong>Evaluación Técnica</strong>
+                    </div>
+                </div>
+
+                <div style="background: white; padding: 24px; border-radius: 8px; border: 1px solid #E5E7EB; margin-bottom: 24px;">
+                    <h3 style="margin: 0 0 20px 0; font-size: 18px; font-weight: 600;">Indicadores de Evaluación</h3>
+
+                    <!-- INDICADOR 1 -->
+                    <div class="indicator-box">
+                        <div class="indicator-title">Comunicación</div>
+                        <div class="indicator-description">Capacidad para expresar ideas de forma clara, escuchar activamente y adaptar el mensaje según el interlocutor.</div>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="comunicacion" value="1">
+                                <span>Deficiente</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="comunicacion" value="2">
+                                <span>Regular</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="comunicacion" value="3">
+                                <span>Bueno</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="comunicacion" value="4">
+                                <span>Muy Bueno</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="comunicacion" value="5">
+                                <span style="color: #10B981; font-weight: 600;">Excelente</span>
+                            </label>
+                        </div>
+                        <textarea placeholder="Observaciones (opcional)"></textarea>
+                    </div>
+
+                    <!-- INDICADOR 2 -->
+                    <div class="indicator-box">
+                        <div class="indicator-title">Pensamiento Analítico</div>
+                        <div class="indicator-description">Capacidad para analizar información compleja, identificar patrones y llegar a conclusiones lógicas.</div>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="analitico" value="1">
+                                <span>Deficiente</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="analitico" value="2">
+                                <span>Regular</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="analitico" value="3" checked>
+                                <span>Bueno</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="analitico" value="4">
+                                <span>Muy Bueno</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="analitico" value="5">
+                                <span style="color: #10B981; font-weight: 600;">Excelente</span>
+                            </label>
+                        </div>
+                        <textarea placeholder="Observaciones (opcional)"></textarea>
+                    </div>
+
+                    <!-- INDICADOR 3 -->
+                    <div class="indicator-box">
+                        <div class="indicator-title">Trabajo en Equipo</div>
+                        <div class="indicator-description">Capacidad para colaborar efectivamente con otros, compartir responsabilidades y contribuir al logro de objetivos comunes.</div>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="equipo" value="1">
+                                <span>Deficiente</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="equipo" value="2">
+                                <span>Regular</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="equipo" value="3">
+                                <span>Bueno</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="equipo" value="4" checked>
+                                <span>Muy Bueno</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="equipo" value="5">
+                                <span style="color: #10B981; font-weight: 600;">Excelente</span>
+                            </label>
+                        </div>
+                        <textarea placeholder="Observaciones (opcional)"></textarea>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="alert('✓ Calificación guardada')">Guardar Calificación</button>
+                    <button class="btn btn-secondary" onclick="switchScreen('practicantes')">Cancelar</button>
+                </div>
+            </div>
+
+            <!-- RESULTADOS SCREEN -->
+            <div id="resultados" class="screen">
+                <div class="page-header">
+                    <h2 class="page-title">Resultados de Evaluaciones</h2>
+                </div>
+
+                <div class="filter-bar">
+                    <div class="form-group">
+                        <label class="form-label">Practicante</label>
+                        <input type="text" placeholder="Todos">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Evaluación</label>
+                        <select>
+                            <option>Todas</option>
+                            <option>Técnica</option>
+                            <option>Competencias</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Estado</label>
+                        <select>
+                            <option>Todos</option>
+                            <option>Calificada</option>
+                            <option>Pendiente</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Fecha</label>
+                        <input type="date">
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%;">Aplicar Filtros</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Practicante</th>
+                                <th>Evaluación</th>
+                                <th style="text-align: center;">Promedio</th>
+                                <th style="text-align: center;">Estado</th>
+                                <th style="text-align: center;">Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>María Gómez</td>
+                                <td>Evaluación Técnica</td>
+                                <td style="text-align: center; font-weight: 600;">4.2</td>
+                                <td style="text-align: center;"><span class="badge badge-success">Calificada</span></td>
+                                <td style="text-align: center;">15 ago 2024</td>
+                            </tr>
+                            <tr>
+                                <td>Juan Pérez</td>
+                                <td>Evaluación Técnica</td>
+                                <td style="text-align: center; font-weight: 600;">3.8</td>
+                                <td style="text-align: center;"><span class="badge badge-success">Calificada</span></td>
+                                <td style="text-align: center;">14 ago 2024</td>
+                            </tr>
+                            <tr>
+                                <td>Marina López</td>
+                                <td>Evaluación Técnica</td>
+                                <td style="text-align: center; font-weight: 600;">4.5</td>
+                                <td style="text-align: center;"><span class="badge badge-warning">Pendiente revisión</span></td>
+                                <td style="text-align: center;">13 ago 2024</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CONFIGURACIÓN SCREEN -->
+            <div id="config" class="screen">
+                <div class="page-header">
+                    <h2 class="page-title">Gestión de Usuarios</h2>
+                    <button class="btn btn-primary">+ Nuevo Usuario</button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Usuario</th>
+                                <th style="text-align: center;">Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>María Gómez</td>
+                                <td>mgomez</td>
+                                <td style="text-align: center;"><span class="badge badge-success">Activo</span></td>
+                                <td><button class="btn btn-tertiary">Editar</button> <button class="btn btn-tertiary btn-danger">Desactivar</button></td>
+                            </tr>
+                            <tr>
+                                <td>Juan Pérez</td>
+                                <td>jperez</td>
+                                <td style="text-align: center;"><span class="badge badge-gray">Inactivo</span></td>
+                                <td><button class="btn btn-tertiary">Editar</button> <button class="btn btn-tertiary" style="color: #10B981;">Activar</button></td>
+                            </tr>
+                            <tr>
+                                <td>Carlos López</td>
+                                <td>clopez</td>
+                                <td style="text-align: center;"><span class="badge badge-success">Activo</span></td>
+                                <td><button class="btn btn-tertiary">Editar</button> <button class="btn btn-tertiary btn-danger">Desactivar</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- MODALS -->
+<div id="shareModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Compartir: Evaluación Técnica</h2>
+            <button class="modal-close" onclick="closeModal('share')">×</button>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Buscar practicantes</label>
+            <input type="text" placeholder="Escribe un nombre...">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Seleccionar practicantes</label>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="p1" checked>
+                    <label for="p1" class="checkbox-label">María Gómez</label>
+                    <span class="checkbox-meta">(2 pendientes)</span>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="p2" checked>
+                    <label for="p2" class="checkbox-label">Martín Pérez</label>
+                    <span class="checkbox-meta">(1 pendiente)</span>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="p3">
+                    <label for="p3" class="checkbox-label">Juan Fernández</label>
+                    <span class="checkbox-meta">(0 pendientes)</span>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="p4">
+                    <label for="p4" class="checkbox-label">Lucía Díaz</label>
+                    <span class="checkbox-meta">(3 pendientes)</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+            <button class="btn btn-secondary" onclick="closeModal('share')" style="flex: 1;">Cancelar</button>
+            <button class="btn btn-primary" onclick="assignEvaluation()" style="flex: 1;">Asignar Evaluación</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function switchScreen(screenId) {
+        // Hide all screens
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.classList.remove('active');
+        });
+
+        // Show selected screen
+        document.getElementById(screenId).classList.add('active');
+
+        // Update sidebar buttons
+        document.querySelectorAll('.sidebar-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        // Update header title
+        const titles = {
+            'dashboard': 'Dashboard',
+            'evaluaciones': 'Gestión de Evaluaciones',
+            'practicantes': 'Seguimiento de Practicantes',
+            'resultados': 'Resultados de Evaluaciones',
+            'config': 'Gestión de Usuarios',
+            'calificar': 'Calificación de Evaluación'
+        };
+
+        document.getElementById('pageTitle').textContent = titles[screenId] || 'Portal Admin';
+    }
+
+    function openModal(modalId) {
+        document.getElementById(modalId + 'Modal').classList.add('active');
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId + 'Modal').classList.remove('active');
+    }
+
+    function assignEvaluation() {
+        alert('✓ Evaluación asignada a 2 practicantes\n\nEl contenido aparecerá automáticamente en sus portales.');
+        closeModal('share');
+    }
+
+    function filterTable(value) {
+        const rows = document.querySelectorAll('#practitionersTable tbody tr');
+        rows.forEach(row => {
+            const name = row.textContent.toLowerCase();
+            row.style.display = name.includes(value.toLowerCase()) ? '' : 'none';
+        });
+    }
+</script>
+
+</body>
+</html>
