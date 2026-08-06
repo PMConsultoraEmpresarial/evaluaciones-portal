@@ -126,7 +126,7 @@
         <button class="backBtn" onclick="backToRole()">← Atrás</button>
         <h2 id="loginTitle">Acceso</h2>
         <div class="error" id="errorMsg"></div>
-        <div class="formGroup"><label>Email</label><input type="text" id="email" placeholder="tu@email.com"></div>
+        <div class="formGroup"><label>Usuario o Email</label><input type="text" id="email" placeholder="julieta.garcia o tu@email.com"></div>
         <div class="formGroup"><label>Contraseña</label><input type="password" id="password" placeholder="Tu contraseña"></div>
         <button class="btnLogin" onclick="doLogin()">Ingresar</button>
     </div>
@@ -269,24 +269,34 @@
     }
     
     async function doLogin() {
-        const email = document.getElementById('email').value.trim();
+        const credential = document.getElementById('email').value.trim();
         const pass = document.getElementById('password').value;
         
-        if (!email || !pass) {
-            showError('Completa email y contraseña');
+        if (!credential || !pass) {
+            showError('Completa usuario/email y contraseña');
             return;
         }
         
         try {
-            const { data, error } = await db.from('users').select('*').eq('email', email);
+            let data = null;
+            let error = null;
             
-            if (error) {
-                showError('Error BD');
-                return;
+            // Primero intenta por email (admin)
+            if (credential.includes('@')) {
+                ({ data, error } = await db.from('users').select('*').eq('email', credential));
+            } else {
+                // Si no tiene @, busca por username (participante)
+                const { data: practData } = await db.from('practitioners').select('user_id').eq('username', credential);
+                if (practData?.length) {
+                    ({ data, error } = await db.from('users').select('*').eq('id', practData[0].user_id));
+                } else {
+                    showError('Usuario no encontrado');
+                    return;
+                }
             }
             
-            if (!data?.length) {
-                showError('Email no encontrado');
+            if (error || !data?.length) {
+                showError('Usuario/Email no encontrado');
                 return;
             }
             
