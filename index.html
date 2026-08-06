@@ -191,11 +191,20 @@
             
             <div id="config" class="section">
                 <div class="card">
-                    <h3>Gestión de Participantes</h3>
+                    <h3>📋 Asignar Módulos a Participantes</h3>
+                    <button class="btn" onclick="showAssignModulesModal()">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+                        Asignar Módulos
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <h3>👥 Gestión de Participantes</h3>
                     <div id="configPractTable"></div>
                 </div>
+                
                 <div class="card">
-                    <h3>Información de Administrador</h3>
+                    <h3>👤 Información de Administrador</h3>
                     <div style="background: #F5F5FA; padding: 20px; border-radius: 12px;">
                         <p style="margin: 10px 0;"><strong>Nombre:</strong> <span id="configAdminName">-</span></p>
                         <p style="margin: 10px 0;"><strong>Email:</strong> <span id="configAdminEmail">-</span></p>
@@ -606,8 +615,10 @@
     async function loadConfigPractitioners() {
         try {
             const { data: practs } = await db.from('practitioners').select('*').order('first_name');
+            const { data: assignments } = await db.from('participant_assignments').select('participant_id, block_id');
+            const { data: blocks } = await db.from('blocks').select('id, name');
             
-            let html = '<table style="width: 100%;"><thead><tr style="background: #F5F5FA;"><th style="padding: 12px; text-align: left;">Nombre</th><th style="padding: 12px; text-align: left;">Usuario</th><th style="padding: 12px; text-align: left;">Estado</th><th style="padding: 12px; text-align: left;">Acciones</th></tr></thead><tbody>';
+            let html = '<table style="width: 100%;"><thead><tr style="background: #F5F5FA;"><th style="padding: 12px; text-align: left;">Nombre</th><th style="padding: 12px; text-align: left;">Usuario</th><th style="padding: 12px; text-align: left;">Estado</th><th style="padding: 12px; text-align: left;">Módulos</th><th style="padding: 12px; text-align: left;">Acciones</th></tr></thead><tbody>';
             
             if (practs?.length) {
                 practs.forEach(p => {
@@ -617,10 +628,17 @@
                     const btnColor = p.is_active ? '#059669' : '#999999';
                     const btnText = p.is_active ? 'Desactivar' : 'Activar';
                     
-                    html += `<tr style="border-bottom: 1px solid #E5E5E5;"><td style="padding: 14px;"><strong>${p.first_name} ${p.last_name}</strong></td><td style="padding: 14px;">${p.username}</td><td style="padding: 14px;"><span style="background: ${badgeColor}; color: ${textColor}; padding: 4px 10px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">${estado}</span></td><td style="padding: 14px;"><button class="btn" style="background: ${btnColor}; padding: 6px 10px; font-size: 0.8em; margin-right: 4px;" onclick="togglePractState('${p.id}', ${!p.is_active})"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>${btnText}</button><button class="btn" style="background: #404469; padding: 6px 10px; font-size: 0.8em;" onclick="showPractChangePasswordModal('${p.id}', '${p.username}', '${p.first_name} ${p.last_name}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Contraseña</button></td></tr>`;
+                    const practAssignments = assignments?.filter(a => a.participant_id === p.id) || [];
+                    const assignedBlocks = practAssignments.map(a => {
+                        const block = blocks?.find(b => b.id === a.block_id);
+                        return block?.name || 'N/A';
+                    });
+                    const modsText = assignedBlocks.length ? assignedBlocks.join(', ') : '<span style="color: #999;">Sin asignar</span>';
+                    
+                    html += `<tr style="border-bottom: 1px solid #E5E5E5;"><td style="padding: 14px;"><strong>${p.first_name} ${p.last_name}</strong></td><td style="padding: 14px;">${p.username}</td><td style="padding: 14px;"><span style="background: ${badgeColor}; color: ${textColor}; padding: 4px 10px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">${estado}</span></td><td style="padding: 14px; font-size: 0.9em;">${modsText}</td><td style="padding: 14px;"><button class="btn" style="background: ${btnColor}; padding: 6px 10px; font-size: 0.75em; margin-right: 4px;" onclick="togglePractState('${p.id}', ${!p.is_active})"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>${btnText}</button><button class="btn" style="background: #404469; padding: 6px 10px; font-size: 0.75em;" onclick="showPractChangePasswordModal('${p.id}', '${p.username}', '${p.first_name} ${p.last_name}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Pwd</button></td></tr>`;
                 });
             } else {
-                html += '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Sin participantes</td></tr>';
+                html += '<tr><td colspan="5" style="text-align: center; padding: 20px; color: #999;">Sin participantes</td></tr>';
             }
             
             html += '</tbody></table>';
@@ -692,22 +710,153 @@
         }
     }
     
+    async function showAssignModulesModal() {
+        const { data: practs } = await db.from('practitioners').select('*').order('first_name');
+        const { data: blocks } = await db.from('blocks').select('*').order('module_id, order_number');
+        const { data: mods } = await db.from('modules').select('*').order('order_number');
+        
+        const modal = document.createElement('div');
+        modal.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; overflow-y: auto;`;
+        
+        let html = `
+            <div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); margin: 20px auto;">
+                <h3 style="margin-bottom: 20px; color: #333;">Asignar Módulos/Bloques a Participante</h3>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Seleccionar Participante:</label>
+                    <select id="practToAssign" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        <option value="">-- Elige un participante --</option>
+        `;
+        
+        practs?.forEach(p => {
+            html += `<option value="${p.id}">${p.first_name} ${p.last_name} (${p.username})</option>`;
+        });
+        
+        html += `
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 20px; max-height: 400px; overflow-y: auto; border: 1px solid #E5E5E5; border-radius: 6px; padding: 15px;">
+        `;
+        
+        mods?.forEach(m => {
+            const modBlocks = blocks?.filter(b => b.module_id === m.id) || [];
+            html += `<div style="margin-bottom: 15px;"><strong style="display: block; margin-bottom: 8px; color: #404469;">${m.name}</strong>`;
+            
+            modBlocks.forEach(b => {
+                html += `<label style="display: flex; align-items: center; margin-bottom: 6px; cursor: pointer;"><input type="checkbox" class="blockCheck" value="${b.id}" style="margin-right: 8px;"><span>${b.name} (${b.total_points} pts)</span></label>`;
+            });
+            
+            html += `</div>`;
+        });
+        
+        html += `
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" style="padding: 10px 20px; background: #ddd; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancelar</button>
+                    <button id="btnAssign" style="padding: 10px 20px; background: #059669; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">✅ Asignar</button>
+                </div>
+            </div>
+        `;
+        
+        modal.innerHTML = html;
+        document.body.appendChild(modal);
+        
+        document.getElementById('btnAssign').onclick = async function() {
+            const practId = document.getElementById('practToAssign').value;
+            if (!practId) {
+                alert('Selecciona un participante');
+                return;
+            }
+            
+            const selectedBlocks = Array.from(document.querySelectorAll('.blockCheck:checked')).map(el => el.value);
+            if (!selectedBlocks.length) {
+                alert('Selecciona al menos un bloque');
+                return;
+            }
+            
+            modal.remove();
+            await doAssignModules(practId, selectedBlocks);
+        };
+    }
+    
+    async function doAssignModules(practId, blockIds) {
+        try {
+            const { data: pract } = await db.from('practitioners').select('first_name, last_name').eq('id', practId).single();
+            
+            for (const blockId of blockIds) {
+                await db.from('participant_assignments').upsert({
+                    participant_id: practId,
+                    block_id: parseInt(blockId),
+                    status: 'pending'
+                });
+            }
+            
+            alert(`✅ Módulos Asignados a ${pract.first_name} ${pract.last_name}`);
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    }
+    
     async function loadEvals() {
         try {
-            const { data: blocks } = await db.from('blocks').select('*').eq('is_published', true).order('module_id');
+            // Obtener el ID del participante actual
+            const { data: practData } = await db.from('practitioners').select('id').eq('user_id', currentUser.id).single();
+            
+            if (!practData) {
+                document.getElementById('evalContainer').innerHTML = '<div class="empty">Error cargando datos del participante</div>';
+                return;
+            }
+            
+            // Obtener las asignaciones del participante
+            const { data: assignments } = await db.from('participant_assignments')
+                .select('block_id')
+                .eq('participant_id', practData.id);
+            
+            if (!assignments?.length) {
+                document.getElementById('evalContainer').innerHTML = '<div class="empty">No tienes módulos asignados aún</div>';
+                return;
+            }
+            
+            // Obtener bloques asignados
+            const blockIds = assignments.map(a => a.block_id);
+            const { data: blocks } = await db.from('blocks').select('*').in('id', blockIds).order('module_id');
+            const { data: mods } = await db.from('modules').select('*').order('order_number');
+            
             const div = document.getElementById('evalContainer');
             div.innerHTML = '';
             
-            if (blocks?.length) {
-                blocks.forEach(b => {
-                    div.innerHTML += `<div class="blockItem"><div class="blockInfo"><strong>${b.name}</strong><p>Puntos: ${b.total_points}</p></div></div>`;
-                });
-            } else {
-                div.innerHTML = '<div class="empty">No hay evaluaciones disponibles</div>';
-            }
+            const groupedByMod = {};
+            blocks?.forEach(b => {
+                if (!groupedByMod[b.module_id]) groupedByMod[b.module_id] = [];
+                groupedByMod[b.module_id].push(b);
+            });
+            
+            Object.keys(groupedByMod).forEach(modId => {
+                const mod = mods?.find(m => m.id === parseInt(modId));
+                if (mod) {
+                    let html = `<div style="margin-bottom: 25px;"><h4 style="font-size: 1.1em; font-weight: 600; margin-bottom: 15px; color: #404469;">${mod.name}</h4>`;
+                    
+                    groupedByMod[modId].forEach(b => {
+                        html += `<div class="blockItem"><div class="blockInfo"><strong>${b.name}</strong><p>Puntos: ${b.total_points}</p></div><button class="btn" style="padding: 8px 16px; font-size: 0.85em;" onclick="startEvaluation(${b.id}, '${b.name}')">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15l-5-5 1.41-1.41L12 14.17l3.59-3.59L17 12l-5 5z"/></svg>
+                            Responder
+                        </button></div>`;
+                    });
+                    
+                    html += `</div>`;
+                    div.innerHTML += html;
+                }
+            });
         } catch (e) {
             console.error('Error:', e);
+            document.getElementById('evalContainer').innerHTML = '<div class="empty">Error cargando evaluaciones</div>';
         }
+    }
+    
+    function startEvaluation(blockId, blockName) {
+        alert(`📝 Evaluación: ${blockName}\n\nFuncionalidad en desarrollo - próxima fase`);
     }
     
     function goSection(id) {
@@ -720,6 +869,8 @@
         
         if (id === 'config') {
             loadConfig();
+        } else if (id === 'eval') {
+            loadEvals();
         }
     }
     
