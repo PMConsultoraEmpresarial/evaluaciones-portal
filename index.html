@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Administrador - Evaluaciones</title>
+    <title>IMPULSA RH - Portal de Evaluaciones</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -13,635 +13,1398 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-            background: #F3F4F6;
-            color: #1F2937;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .container {
-            display: grid;
-            grid-template-columns: 240px 1fr;
+            width: 100%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        /* LOGIN PAGE */
+        .login-page {
+            display: flex;
             min-height: 100vh;
         }
 
-        /* SIDEBAR */
-        .sidebar {
-            background: #1F2937;
-            padding: 16px;
-            border-right: 1px solid #E5E7EB;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            overflow-y: auto;
-        }
-
-        .sidebar-title {
-            font-weight: 600;
-            color: white;
-            font-size: 16px;
-            margin-bottom: 24px;
-        }
-
-        .sidebar-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .sidebar-btn {
-            background: transparent;
-            color: white;
-            border: none;
-            padding: 12px 16px;
-            border-radius: 6px;
-            text-align: left;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background 0.2s;
-        }
-
-        .sidebar-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .sidebar-btn.active {
-            background: #2563EB;
-        }
-
-        /* MAIN CONTENT */
-        .main {
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* HEADER */
-        .header {
-            background: white;
-            padding: 16px 32px;
-            border-bottom: 1px solid #E5E7EB;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .header-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1F2937;
-        }
-
-        .header-user {
-            display: flex;
-            gap: 16px;
-            align-items: center;
-        }
-
-        .header-user span {
-            font-size: 14px;
-            color: #6B7280;
-        }
-
-        .header-user button {
-            background: transparent;
-            border: none;
-            color: #EF4444;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        /* CONTENT */
-        .content {
-            padding: 32px;
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
-            overflow-y: auto;
+        .login-left {
             flex: 1;
-        }
-
-        .screen {
-            display: none;
-        }
-
-        .screen.active {
-            display: block;
-        }
-
-        /* GRID LAYOUT */
-        .metric-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 32px;
-        }
-
-        .metric-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #E5E7EB;
-        }
-
-        .metric-label {
-            font-size: 12px;
-            color: #6B7280;
-            margin-bottom: 8px;
-        }
-
-        .metric-value {
-            font-size: 32px;
-            font-weight: 600;
-        }
-
-        /* CARD GRID */
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #E5E7EB;
-            cursor: pointer;
-            transition: box-shadow 0.2s;
-        }
-
-        .card:hover {
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1F2937;
-            margin-bottom: 8px;
-        }
-
-        .card-description {
-            font-size: 13px;
-            color: #6B7280;
-            line-height: 1.5;
-            margin-bottom: 12px;
-            min-height: 40px;
-        }
-
-        .card-meta {
-            font-size: 12px;
-            color: #6B7280;
-            margin-bottom: 8px;
-        }
-
-        .card-buttons {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px;
             display: flex;
-            gap: 8px;
-            margin-top: 12px;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-left h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .login-left p {
+            font-size: 1.1em;
+            opacity: 0.9;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .login-right {
+            flex: 1;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .login-right h2 {
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
         }
 
         .btn {
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.2s;
+            padding: 12px 24px;
             border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
         .btn-primary {
-            background: #2563EB;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            width: 100%;
+            margin-top: 20px;
         }
 
         .btn-primary:hover {
-            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
 
-        .btn-secondary {
-            background: white;
-            border: 1px solid #D1D5DB;
-            color: #1F2937;
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* MAIN APP */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar h3 {
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        .sidebar-item {
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .sidebar-item.active {
+            background: #667eea;
+            border-left-color: #fff;
+        }
+
+        .main-content {
             flex: 1;
+            padding: 30px;
+            background: #f5f7fa;
+            overflow-y: auto;
         }
 
-        .btn-secondary:hover {
-            background: #F3F4F6;
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        .btn-tertiary {
-            background: transparent;
-            border: none;
-            color: #2563EB;
-            padding: 6px 12px;
+        .header h1 {
+            color: #2c3e50;
+            font-size: 1.8em;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-info p {
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        /* CARDS */
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
         }
 
         /* TABLE */
-        .table-container {
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #E5E7EB;
-            overflow: hidden;
+        .table-responsive {
+            overflow-x: auto;
         }
 
         table {
             width: 100%;
-            font-size: 14px;
             border-collapse: collapse;
+            margin-top: 15px;
         }
 
-        thead {
-            background: #F3F4F6;
-            border-bottom: 1px solid #E5E7EB;
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
         }
 
         th {
-            padding: 12px 16px;
-            text-align: left;
+            background: #ecf0f1;
             font-weight: 600;
-            color: #6B7280;
-            font-size: 12px;
+            color: #2c3e50;
         }
 
-        td {
-            padding: 12px 16px;
-            color: #1F2937;
-            border-bottom: 1px solid #E5E7EB;
+        tr:hover {
+            background: #f9f9f9;
         }
 
-        tbody tr:hover {
-            background: #F9FAFB;
-        }
-
-        /* BADGE */
-        .badge {
+        .status-badge {
             display: inline-block;
             padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 500;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
         }
 
-        .badge-success {
-            background: #DCFCE7;
-            color: #166534;
+        .status-active {
+            background: #d4edda;
+            color: #155724;
         }
 
-        .eval-badge {
-            display: inline-block;
-            padding: 2px 8px;
+        .status-inactive {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-completed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        /* MODALS */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .modal-header h2 {
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #ecf0f1;
             border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-right: 4px;
+            overflow: hidden;
+            margin-top: 10px;
         }
 
-        .eval-badge-tecnica {
-            background: #DBEAFE;
-            color: #0c2d5c;
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            transition: width 0.3s;
         }
 
-        .eval-badge-competencias {
-            background: #FEE2E4;
-            color: #9f1239;
+        /* INDICATORS */
+        .indicator-list {
+            margin-top: 15px;
+            padding-left: 20px;
         }
 
-        .eval-badge-comercial {
-            background: #F0FDF4;
-            color: #15803d;
+        .indicator-item {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            border-radius: 3px;
         }
 
-        .eval-badge-administrativa {
-            background: #FEF3C7;
-            color: #78350f;
+        .indicator-item strong {
+            color: #2c3e50;
         }
 
-        .eval-badge-liderazgo {
-            background: #E9D5FF;
-            color: #6b21a8;
+        .indicator-item p {
+            color: #666;
+            margin: 5px 0 0 0;
+            font-size: 0.9em;
         }
 
-        .eval-badge-procesos {
-            background: #CCFBF1;
-            color: #134e4a;
+        .rating-scale {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
         }
 
-        .page-title {
-            font-size: 24px;
-            font-weight: 600;
-            color: #1F2937;
-            margin-bottom: 24px;
-        }
-
-        .loading {
+        .rating-option {
+            flex: 1;
+            padding: 10px;
             text-align: center;
-            padding: 40px;
-            color: #6B7280;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .rating-option:hover {
+            border-color: #667eea;
+        }
+
+        .rating-option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* LOADING */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                display: flex;
+                overflow-x: auto;
+            }
+
+            .sidebar-item {
+                white-space: nowrap;
+                margin-right: 10px;
+            }
+
+            .login-page {
+                flex-direction: column;
+            }
+
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .user-info {
+                text-align: left;
+                margin-top: 15px;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="login-page">
+    <div class="login-left">
+        <h1>🎓 IMPULSA RH</h1>
+        <p>Portal de Evaluaciones del Programa IMPULSA RH</p>
+        <p>Sistema integral de gestión de competencias y desarrollo profesional</p>
+        <div style="margin-top: 40px; font-size: 0.9em; opacity: 0.8;">
+            <p><strong>Admin:</strong> selecciondetalentosarg@gmail.com</p>
+            <p><strong>Contraseña:</strong> PMConsultora26</p>
+        </div>
+    </div>
+    <div class="login-right">
+        <h2>Ingresa a tu Cuenta</h2>
+        <div class="error-message" id="loginError"></div>
+        <div class="form-group">
+            <label for="loginEmail">Email o Usuario</label>
+            <input type="text" id="loginEmail" placeholder="tu@email.com o tu.usuario">
+        </div>
+        <div class="form-group">
+            <label for="loginPassword">Contraseña</label>
+            <input type="password" id="loginPassword" placeholder="Tu contraseña">
+        </div>
+        <button class="btn btn-primary" onclick="loginUser()">Ingresar</button>
+    </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" class="app-container" style="display: none;">
     <!-- SIDEBAR -->
     <div class="sidebar">
-        <div class="sidebar-title">Portal Admin</div>
-        <div class="sidebar-menu">
-            <button class="sidebar-btn active" onclick="switchScreen('dashboard')">📊 Dashboard</button>
-            <button class="sidebar-btn" onclick="switchScreen('evaluaciones')">📋 Evaluaciones</button>
-            <button class="sidebar-btn" onclick="switchScreen('practicantes')">👥 Practicantes</button>
-            <button class="sidebar-btn" onclick="switchScreen('resultados')">📈 Resultados</button>
-            <button class="sidebar-btn" onclick="switchScreen('config')">⚙️ Configuración</button>
+        <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);">
+            <h3>👤 Menú</h3>
+        </div>
+
+        <!-- ADMIN MENU -->
+        <div id="adminMenu" style="display: none;">
+            <h3>Administrador</h3>
+            <div class="sidebar-item active" onclick="showSection('adminDashboard')">
+                📊 Dashboard
+            </div>
+            <div class="sidebar-item" onclick="showSection('adminConfig')">
+                ⚙️ Configuración
+            </div>
+            <div class="sidebar-item" onclick="showSection('adminModules')">
+                📚 Módulos y Bloques
+            </div>
+            <div class="sidebar-item" onclick="showSection('adminGrade')">
+                👥 Calificar
+            </div>
+            <div class="sidebar-item" onclick="showSection('adminReports')">
+                📈 Reportes
+            </div>
+        </div>
+
+        <!-- PRACTITIONER MENU -->
+        <div id="practitionerMenu" style="display: none;">
+            <h3>Participante</h3>
+            <div class="sidebar-item active" onclick="showSection('practitionerDash')">
+                📋 Mis Evaluaciones
+            </div>
+            <div class="sidebar-item" onclick="showSection('practitionerModules')">
+                📚 Módulos
+            </div>
+            <div class="sidebar-item" onclick="showSection('practitionerScores')">
+                📊 Mis Calificaciones
+            </div>
+            <div class="sidebar-item" onclick="showSection('practitionerProfile')">
+                👤 Mi Perfil
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+            <button class="btn btn-danger btn-small" onclick="logoutUser()" style="width: 100%;">🚪 Cerrar Sesión</button>
         </div>
     </div>
 
-    <!-- MAIN -->
-    <div class="main">
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
         <!-- HEADER -->
         <div class="header">
-            <div class="header-title" id="pageTitle">Dashboard</div>
-            <div class="header-user">
-                <span id="userEmail">admin@empresa.com</span>
-                <button onclick="logout()">Cerrar sesión</button>
+            <div>
+                <h1 id="pageTitle">Dashboard</h1>
+            </div>
+            <div class="user-info">
+                <p><strong id="currentUserName">Usuario</strong></p>
+                <p id="currentUserEmail" style="font-size: 0.9em;">email@example.com</p>
             </div>
         </div>
 
-        <!-- CONTENT -->
-        <div class="content">
-
-            <!-- DASHBOARD SCREEN -->
-            <div id="dashboard" class="screen active">
-                <div class="metric-grid">
-                    <div class="metric-card">
-                        <div class="metric-label">Evaluaciones Activas</div>
-                        <div class="metric-value" id="metricEvals">0</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Practicantes Totales</div>
-                        <div class="metric-value" id="metricPracs">0</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Pendientes de Respuesta</div>
-                        <div class="metric-value">--</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-label">Calificadas</div>
-                        <div class="metric-value">--</div>
-                    </div>
+        <!-- ADMIN DASHBOARD -->
+        <div id="adminDashboard" class="section" style="display: none;">
+            <div class="card-grid">
+                <div class="card">
+                    <h3>👥 Participantes Activos</h3>
+                    <p style="font-size: 2em; color: #667eea; font-weight: bold;" id="totalPractitioners">0</p>
                 </div>
+                <div class="card">
+                    <h3>📚 Bloques Publicados</h3>
+                    <p style="font-size: 2em; color: #667eea; font-weight: bold;" id="totalPublished">0</p>
+                </div>
+                <div class="card">
+                    <h3>✅ Evaluaciones Completadas</h3>
+                    <p style="font-size: 2em; color: #667eea; font-weight: bold;" id="totalEvaluated">0</p>
+                </div>
+            </div>
 
-                <div class="table-container" style="margin-top: 32px;">
-                    <div style="background: #F3F4F6; padding: 16px; border-bottom: 1px solid #E5E7EB;">
-                        <h3 style="margin: 0; font-size: 16px; font-weight: 600;">Evaluaciones Activas</h3>
-                    </div>
-                    <table id="dashboardTable">
+            <div class="card">
+                <h3>Últimas Evaluaciones</h3>
+                <div class="table-responsive">
+                    <table id="recentScoresTable">
                         <thead>
                             <tr>
-                                <th>Evaluación</th>
-                                <th>Preguntas</th>
-                                <th>Estado</th>
+                                <th>Participante</th>
+                                <th>Bloque</th>
+                                <th>Calificación</th>
+                                <th>Fecha</th>
                             </tr>
                         </thead>
-                        <tbody id="dashboardTableBody">
-                            <tr><td colspan="3" class="loading">Cargando...</td></tr>
-                        </tbody>
+                        <tbody></tbody>
                     </table>
                 </div>
             </div>
+        </div>
 
-            <!-- EVALUACIONES SCREEN -->
-            <div id="evaluaciones" class="screen">
-                <h2 class="page-title">Gestión de Evaluaciones</h2>
-                <div class="card-grid" id="evaluacionesGrid">
-                    <div class="loading" style="grid-column: 1/-1;">Cargando evaluaciones...</div>
+        <!-- ADMIN CONFIGURATION -->
+        <div id="adminConfig" class="section" style="display: none;">
+            <!-- MY ACCOUNT TAB -->
+            <div class="card">
+                <h3>Mi Cuenta</h3>
+                <div style="margin-top: 20px;">
+                    <p><strong>Email:</strong> <span id="adminEmailDisplay">-</span></p>
+                    <hr style="margin: 15px 0;">
+                    <h4 style="margin-bottom: 15px;">Cambiar Contraseña</h4>
+                    <div class="form-group">
+                        <label>Contraseña Actual</label>
+                        <input type="password" id="currentPassword" placeholder="Tu contraseña actual">
+                    </div>
+                    <div class="form-group">
+                        <label>Nueva Contraseña</label>
+                        <input type="password" id="newPassword" placeholder="Nueva contraseña">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirmar Nueva Contraseña</label>
+                        <input type="password" id="confirmPassword" placeholder="Confirmar nueva contraseña">
+                    </div>
+                    <button class="btn btn-success" onclick="changeAdminPassword()">Cambiar Contraseña</button>
                 </div>
             </div>
 
-            <!-- PRACTICANTES SCREEN -->
-            <div id="practicantes" class="screen">
-                <h2 class="page-title">Seguimiento de Practicantes</h2>
-
-                <div class="table-container">
-                    <table id="practitionersTable">
+            <!-- PARTICIPANTS TAB -->
+            <div class="card" style="margin-top: 30px;">
+                <h3>Gestión de Participantes</h3>
+                <button class="btn btn-primary" onclick="openAddParticipantModal()" style="margin-bottom: 20px;">+ Agregar Nuevo Participante</button>
+                
+                <div class="table-responsive">
+                    <table id="participantsTable">
                         <thead>
                             <tr>
                                 <th>Nombre</th>
-                                <th>Email</th>
-                                <th style="text-align: center;">Departamento</th>
-                                <th style="text-align: center;">Estado</th>
+                                <th>Usuario</th>
+                                <th>Estado</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
-                        <tbody id="practitionersBody">
-                            <tr><td colspan="5" class="loading">Cargando practicantes...</td></tr>
-                        </tbody>
+                        <tbody></tbody>
                     </table>
                 </div>
             </div>
+        </div>
 
-            <!-- RESULTADOS SCREEN -->
-            <div id="resultados" class="screen">
-                <h2 class="page-title">Resultados de Evaluaciones</h2>
+        <!-- ADMIN MODULES -->
+        <div id="adminModules" class="section" style="display: none;">
+            <div id="modulesContainer"></div>
+        </div>
 
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Practicante</th>
-                                <th>Evaluación</th>
-                                <th style="text-align: center;">Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="resultadosBody">
-                            <tr><td colspan="3" class="loading">No hay resultados aún</td></tr>
-                        </tbody>
-                    </table>
+        <!-- ADMIN GRADE -->
+        <div id="adminGrade" class="section" style="display: none;">
+            <div class="card">
+                <h3>Selecciona Participante para Calificar</h3>
+                <div class="form-group">
+                    <label>Participante</label>
+                    <select id="gradePractitioner" onchange="loadPractitionerForGrading()">
+                        <option value="">-- Selecciona un participante --</option>
+                    </select>
+                </div>
+                <div id="gradingContainer"></div>
+            </div>
+        </div>
+
+        <!-- ADMIN REPORTS -->
+        <div id="adminReports" class="section" style="display: none;">
+            <div class="card">
+                <h3>Reportes por Participante</h3>
+                <div id="reportsContainer"></div>
+            </div>
+        </div>
+
+        <!-- PRACTITIONER DASHBOARD -->
+        <div id="practitionerDash" class="section" style="display: none;">
+            <div class="card">
+                <h3>Puntos Totales</h3>
+                <p style="font-size: 2em; color: #667eea; font-weight: bold;" id="totalPointsPract">0 / 100</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
                 </div>
             </div>
 
-            <!-- CONFIGURACIÓN SCREEN -->
-            <div id="config" class="screen">
-                <h2 class="page-title">Gestión de Usuarios</h2>
+            <div id="modulesProgressContainer"></div>
+        </div>
 
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Email</th>
-                                <th style="text-align: center;">Rol</th>
-                                <th style="text-align: center;">Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="usersBody">
-                            <tr><td colspan="4" class="loading">Cargando usuarios...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+        <!-- PRACTITIONER MODULES -->
+        <div id="practitionerModules" class="section" style="display: none;">
+            <div id="availableModulesContainer"></div>
+        </div>
+
+        <!-- PRACTITIONER SCORES -->
+        <div id="practitionerScores" class="section" style="display: none;">
+            <div class="card">
+                <h3>Historial de Calificaciones</h3>
+                <div id="scoresHistoryContainer"></div>
             </div>
+        </div>
 
+        <!-- PRACTITIONER PROFILE -->
+        <div id="practitionerProfile" class="section" style="display: none;">
+            <div class="card">
+                <h3>Mi Perfil</h3>
+                <p><strong>Nombre:</strong> <span id="profileName">-</span></p>
+                <p><strong>Usuario:</strong> <span id="profileUsername">-</span></p>
+                <p><strong>Email:</strong> <span id="profileEmail">-</span></p>
+                <p><strong>Departamento:</strong> <span id="profileDept">-</span></p>
+                <hr style="margin: 20px 0;">
+                <h4 style="margin-bottom: 15px;">Cambiar Contraseña</h4>
+                <div class="form-group">
+                    <label>Contraseña Actual</label>
+                    <input type="password" id="practCurrentPassword" placeholder="Tu contraseña actual">
+                </div>
+                <div class="form-group">
+                    <label>Nueva Contraseña</label>
+                    <input type="password" id="practNewPassword" placeholder="Nueva contraseña">
+                </div>
+                <div class="form-group">
+                    <label>Confirmar Nueva Contraseña</label>
+                    <input type="password" id="practConfirmPassword" placeholder="Confirmar nueva contraseña">
+                </div>
+                <button class="btn btn-success" onclick="changePractitionerPassword()">Cambiar Contraseña</button>
+            </div>
         </div>
     </div>
 </div>
 
-<script>
-console.log('===== INICIANDO PORTAL =====');
-
-// ========== SUPABASE CONFIG - CREDENCIALES V2 ==========
-const SUPABASE_URL = 'https://hczhiogytmuzsmfsnpbi.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhjemhpb2d5dG11enNtZnNucGJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5Nzk1NDAsImV4cCI6MjEwMTU1NTU0MH0.VOQ2KJRps0v24Bd_XC6xWrBx-5yrA_Hk6RMPUFpIbo4';
-
-console.log('✓ Config Supabase cargada (v2)');
-
-const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// ========== VARIABLES GLOBALES ==========
-let allEvaluations = [];
-let allPractitioners = [];
-
-// ========== INICIALIZAR ==========
-document.addEventListener('DOMContentLoaded', async () => {
-  console.log('📄 DOM cargado');
-  await loadData();
-  renderDashboard();
-});
-
-// ========== CARGAR DATOS ==========
-async function loadData() {
-  console.log('→ Cargando datos...');
-  
-  try {
-    const { data: evals, error: evalError } = await sb.from('evaluations').select('*').order('created_at', { ascending: false });
-    if (evalError) throw evalError;
-    allEvaluations = evals || [];
-    console.log('✓ Evaluaciones cargadas:', allEvaluations.length);
-    
-    const { data: pracs, error: pracError } = await sb.from('practitioners').select('*').order('first_name');
-    if (pracError) throw pracError;
-    allPractitioners = pracs || [];
-    console.log('✓ Practicantes cargados:', allPractitioners.length);
-  } catch (error) {
-    console.error('✗ Error:', error);
-    alert('Error: ' + error.message);
-  }
-}
-
-// ========== RENDER DASHBOARD ==========
-function renderDashboard() {
-  document.getElementById('metricEvals').textContent = allEvaluations.length;
-  document.getElementById('metricPracs').textContent = allPractitioners.length;
-
-  const tbody = document.getElementById('dashboardTableBody');
-  if (allEvaluations.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="3" class="loading">No hay evaluaciones</td></tr>';
-    return;
-  }
-
-  tbody.innerHTML = allEvaluations.map(e => `
-    <tr>
-      <td><span class="eval-badge eval-badge-${e.type}">${e.type.toUpperCase()}</span> ${e.name}</td>
-      <td>${e.total_questions} preguntas</td>
-      <td><span class="badge badge-success">Activa</span></td>
-    </tr>
-  `).join('');
-}
-
-// ========== SWITCH SCREEN ==========
-function switchScreen(screenId) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(screenId).classList.add('active');
-
-  document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
-
-  const titles = {
-    'dashboard': 'Dashboard',
-    'evaluaciones': 'Gestión de Evaluaciones',
-    'practicantes': 'Seguimiento de Practicantes',
-    'resultados': 'Resultados de Evaluaciones',
-    'config': 'Gestión de Usuarios'
-  };
-
-  document.getElementById('pageTitle').textContent = titles[screenId] || 'Dashboard';
-
-  if (screenId === 'evaluaciones') renderEvaluaciones();
-  else if (screenId === 'practicantes') renderPracticantes();
-  else if (screenId === 'config') renderUsers();
-}
-
-// ========== RENDER EVALUACIONES ==========
-function renderEvaluaciones() {
-  const grid = document.getElementById('evaluacionesGrid');
-  
-  if (allEvaluations.length === 0) {
-    grid.innerHTML = '<div class="loading" style="grid-column: 1/-1;">No hay evaluaciones</div>';
-    return;
-  }
-
-  grid.innerHTML = allEvaluations.map(e => `
-    <div class="card">
-      <div class="card-title">✔ <span class="eval-badge eval-badge-${e.type}">${e.type.toUpperCase()}</span></div>
-      <div class="card-title" style="font-size: 16px; margin-bottom: 8px;">${e.name}</div>
-      <p class="card-description">${e.description}</p>
-      <div class="card-meta">📌 Preguntas: ${e.total_questions}</div>
-      <div class="card-meta">📅 Creada: ${new Date(e.created_at).toLocaleDateString('es-ES')}</div>
-      <div class="card-buttons">
-        <button class="btn btn-secondary">Editar</button>
-        <button class="btn btn-secondary">Compartir</button>
-      </div>
+<!-- MODALS -->
+<div id="addParticipantModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="modal-close" onclick="closeModal('addParticipantModal')">&times;</span>
+            <h2>Agregar Nuevo Participante</h2>
+        </div>
+        <div class="success-message" id="participantSuccess"></div>
+        <div class="error-message" id="participantError"></div>
+        <div class="form-group">
+            <label>Nombre</label>
+            <input type="text" id="participantFirstName" placeholder="Nombre">
+        </div>
+        <div class="form-group">
+            <label>Apellido</label>
+            <input type="text" id="participantLastName" placeholder="Apellido">
+        </div>
+        <div class="form-group">
+            <label>Usuario</label>
+            <input type="text" id="participantUsername" placeholder="usuario.name">
+        </div>
+        <div class="form-group">
+            <label>Contraseña</label>
+            <input type="text" id="participantPassword" placeholder="Generar automáticamente">
+        </div>
+        <div class="form-group">
+            <label>Departamento (opcional)</label>
+            <input type="text" id="participantDept" placeholder="Departamento">
+        </div>
+        <button class="btn btn-success" onclick="saveNewParticipant()">Guardar Participante</button>
     </div>
-  `).join('');
-}
+</div>
 
-// ========== RENDER PRACTICANTES ==========
-function renderPracticantes() {
-  const tbody = document.getElementById('practitionersBody');
-  
-  if (allPractitioners.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="5" class="loading">No hay practicantes</td></tr>';
-    return;
-  }
+<div id="editParticipantModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="modal-close" onclick="closeModal('editParticipantModal')">&times;</span>
+            <h2>Editar Participante</h2>
+        </div>
+        <div class="success-message" id="editSuccess"></div>
+        <div class="error-message" id="editError"></div>
+        <input type="hidden" id="editParticipantId">
+        <div class="form-group">
+            <label>Nombre Completo</label>
+            <p id="editParticipantName" style="font-weight: bold;"></p>
+        </div>
+        <div class="form-group">
+            <label>Usuario</label>
+            <p id="editParticipantUsername"></p>
+        </div>
+        <div class="form-group">
+            <label>Contraseña (dejar en blanco para no cambiar)</label>
+            <input type="text" id="editParticipantPassword" placeholder="Nueva contraseña">
+            <small style="display: block; margin-top: 5px;"><strong>Actual:</strong> <span id="currentPasswordDisplay" style="font-family: monospace;">••••••••</span></small>
+            <button class="btn btn-small btn-primary" onclick="copyPassword()" style="margin-top: 5px;">Copiar Contraseña</button>
+        </div>
+        <div class="form-group">
+            <label>Estado</label>
+            <div style="margin-top: 10px;">
+                <label><input type="radio" name="participantStatus" value="true" id="statusActive"> ✅ Activo</label>
+                <label style="margin-left: 20px;"><input type="radio" name="participantStatus" value="false" id="statusInactive"> ❌ Inactivo</label>
+            </div>
+        </div>
+        <button class="btn btn-success" onclick="saveEditParticipant()">Guardar Cambios</button>
+    </div>
+</div>
 
-  tbody.innerHTML = allPractitioners.map(p => `
-    <tr>
-      <td>${p.first_name} ${p.last_name}</td>
-      <td>${p.email}</td>
-      <td style="text-align: center;">${p.department || '-'}</td>
-      <td style="text-align: center;"><span class="badge badge-success">Activo</span></td>
-      <td>
-        <button class="btn btn-tertiary">Calificar</button>
-        <button class="btn btn-tertiary">Ver respuestas</button>
-      </td>
-    </tr>
-  `).join('');
-}
+<script>
+    // SUPABASE CONFIG
+    const SUPABASE_URL = 'https://hczhiogytmuzsmfsnpbi.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhjemhpb2d5dG11enNtZnNucGJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5Nzk1NDAsImV4cCI6MjEwMTU1NTU0MH0.VOQ2KJRps0v24Bd_XC6xWrBx-5yrA_Hk6RMPUFpIbo4';
+    
+    const { createClient } = window.supabase;
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ========== RENDER USERS ==========
-function renderUsers() {
-  document.getElementById('usersBody').innerHTML = `
-    <tr>
-      <td>Administrador Portal</td>
-      <td>admin@empresa.com</td>
-      <td style="text-align: center;">admin</td>
-      <td style="text-align: center;"><span class="badge badge-success">Activo</span></td>
-    </tr>
-  `;
-}
+    let currentUser = null;
 
-// ========== LOGOUT ==========
-function logout() {
-  if (confirm('¿Cerrar sesión?')) {
-    alert('Sesión cerrada');
-    location.reload();
-  }
-}
+    // LOGIN
+    async function loginUser() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
 
-console.log('✓ Scripts cargados');
+        if (!email || !password) {
+            showLoginError('Por favor completa todos los campos');
+            return;
+        }
+
+        // Buscar usuario por email o username
+        let { data: users, error: userError } = await supabase
+            .from('users')
+            .select('*')
+            .or(`email.eq.${email},email.eq.${email}@empresa.com`);
+
+        if (userError || !users || users.length === 0) {
+            showLoginError('Usuario o contraseña incorrectos');
+            return;
+        }
+
+        const user = users[0];
+
+        // Validar contraseña (en producción usar bcrypt)
+        if (!validatePassword(password, user.password_hash)) {
+            showLoginError('Usuario o contraseña incorrectos');
+            return;
+        }
+
+        // Actualizar último login
+        await supabase
+            .from('users')
+            .update({ last_login: new Date().toISOString() })
+            .eq('id', user.id);
+
+        // Guardar en sesión
+        currentUser = user;
+        localStorage.setItem('currentUser', JSON.stringify(user));
+
+        // Mostrar app
+        showApp();
+    }
+
+    function validatePassword(input, hash) {
+        // Contraseña por defecto (para demo)
+        if (input === 'PMConsultora26') return hash.includes('PMConsultora26') || hash.includes('EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lm');
+        // Para practicantes, comparar directamente (en producción usar bcrypt.js)
+        return input === hash || simpleHashMatch(input, hash);
+    }
+
+    function simpleHashMatch(input, hash) {
+        // Hash simple para demo (en producción NO hacer esto)
+        if (!input || !hash) return false;
+        const btoa_input = btoa(input);
+        return hash === btoa_input || hash === input;
+    }
+
+    function showLoginError(message) {
+        const errorEl = document.getElementById('loginError');
+        errorEl.textContent = message;
+        errorEl.classList.add('show');
+        setTimeout(() => errorEl.classList.remove('show'), 5000);
+    }
+
+    // SHOW APP
+    function showApp() {
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'flex';
+
+        // Actualizar UI según rol
+        if (currentUser.role === 'admin') {
+            document.getElementById('adminMenu').style.display = 'block';
+            document.getElementById('practitionerMenu').style.display = 'none';
+            document.getElementById('currentUserName').textContent = 'Administrador';
+            document.getElementById('currentUserEmail').textContent = currentUser.email;
+            document.getElementById('adminEmailDisplay').textContent = currentUser.email;
+            loadAdminDashboard();
+            showSection('adminDashboard');
+        } else {
+            document.getElementById('adminMenu').style.display = 'none';
+            document.getElementById('practitionerMenu').style.display = 'block';
+            document.getElementById('currentUserName').textContent = `${currentUser.full_name || 'Participante'}`;
+            document.getElementById('currentUserEmail').textContent = currentUser.email;
+            loadPractitionerDashboard();
+            showSection('practitionerDash');
+        }
+    }
+
+    // SHOW SECTION
+    function showSection(sectionId) {
+        // Ocultar todas las secciones
+        document.querySelectorAll('.section').forEach(el => el.style.display = 'none');
+        
+        // Mostrar sección seleccionada
+        document.getElementById(sectionId).style.display = 'block';
+
+        // Actualizar sidebar
+        document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
+        event.target.classList.add('active');
+
+        // Actualizar título
+        const titles = {
+            'adminDashboard': 'Dashboard',
+            'adminConfig': 'Configuración',
+            'adminModules': 'Módulos y Bloques',
+            'adminGrade': 'Calificar Participantes',
+            'adminReports': 'Reportes',
+            'practitionerDash': 'Mis Evaluaciones',
+            'practitionerModules': 'Módulos Disponibles',
+            'practitionerScores': 'Mis Calificaciones',
+            'practitionerProfile': 'Mi Perfil'
+        };
+        document.getElementById('pageTitle').textContent = titles[sectionId] || 'Portal';
+
+        // Cargar datos específicos según sección
+        if (sectionId === 'practitionerScores') loadScoresHistory();
+        if (sectionId === 'practitionerProfile') loadPractitionerProfile();
+        if (sectionId === 'adminReports') loadAdminReports();
+    }
+
+    // ADMIN FUNCTIONS
+    async function loadAdminDashboard() {
+        // Cargar participantes
+        let { data: practitioners } = await supabase.from('practitioners').select('*').eq('is_active', true);
+        document.getElementById('totalPractitioners').textContent = practitioners?.length || 0;
+
+        // Cargar bloques publicados
+        let { data: published } = await supabase.from('blocks').select('*').eq('is_published', true);
+        document.getElementById('totalPublished').textContent = published?.length || 0;
+
+        // Cargar evaluaciones completadas
+        let { data: evaluated } = await supabase.from('evaluation_scores').select('*');
+        document.getElementById('totalEvaluated').textContent = evaluated?.length || 0;
+
+        // Últimas evaluaciones
+        let { data: recent } = await supabase
+            .from('evaluation_scores')
+            .select('*, submission_id (evaluation_id (name, block_id (name)), practitioner_id (first_name, last_name))')
+            .order('rated_at', { ascending: false })
+            .limit(5);
+
+        // Mostrar en tabla (simplificado)
+        const tbody = document.querySelector('#recentScoresTable tbody');
+        tbody.innerHTML = '';
+        if (recent) {
+            recent.forEach(score => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>-</td>
+                    <td>-</td>
+                    <td>${score.score}/${score.score}</td>
+                    <td>${new Date(score.rated_at).toLocaleDateString()}</td>
+                `;
+            });
+        }
+    }
+
+    async function loadPractitioners() {
+        const { data, error } = await supabase
+            .from('practitioners')
+            .select('*')
+            .order('first_name');
+
+        if (error) console.error(error);
+
+        const tbody = document.querySelector('#participantsTable tbody');
+        tbody.innerHTML = '';
+
+        if (data && data.length > 0) {
+            data.forEach(p => {
+                if (!p || !p.id) return;
+                const row = tbody.insertRow();
+                const fname = (p.first_name || 'N/A').toString().trim();
+                const lname = (p.last_name || '').toString().trim();
+                const uname = (p.username || 'N/A').toString().trim();
+                row.innerHTML = `
+                    <td>${fname} ${lname}</td>
+                    <td>${uname}</td>
+                    <td><span class="status-badge ${p.is_active ? 'status-active' : 'status-inactive'}">${p.is_active ? '✅ Activo' : '❌ Inactivo'}</span></td>
+                    <td>
+                        <button class="btn btn-small btn-primary" onclick="editParticipant('${p.id}')">Editar</button>
+                        <button class="btn btn-small btn-danger" onclick="deleteParticipant('${p.id}')">Eliminar</button>
+                    </td>
+                `;
+            });
+        } else {
+            const row = tbody.insertRow();
+            row.innerHTML = '<td colspan="4" style="text-align: center; padding: 20px;">No hay participantes creados aún</td>';
+        }
+
+        // Llenar select de calificación
+        const select = document.getElementById('gradePractitioner');
+        if (select) {
+            select.innerHTML = '<option value="">-- Selecciona un participante --</option>';
+            if (data && data.length > 0) {
+                data.forEach(p => {
+                    if (!p || !p.id) return;
+                    const option = document.createElement('option');
+                    option.value = p.id;
+                    const fname = (p.first_name || 'N/A').toString().trim();
+                    const lname = (p.last_name || '').toString().trim();
+                    option.textContent = `${fname} ${lname}`;
+                    select.appendChild(option);
+                });
+            }
+        }
+    }
+
+    function openAddParticipantModal() {
+        document.getElementById('addParticipantModal').classList.add('show');
+    }
+
+    async function saveNewParticipant() {
+        const firstName = document.getElementById('participantFirstName').value;
+        const lastName = document.getElementById('participantLastName').value;
+        const username = document.getElementById('participantUsername').value;
+        const password = document.getElementById('participantPassword').value;
+        const dept = document.getElementById('participantDept').value;
+
+        if (!firstName || !lastName || !username) {
+            showError('participantError', 'Completa todos los campos requeridos');
+            return;
+        }
+
+        const pwd = password || generatePassword();
+
+        // Crear user
+        const { data: newUser, error: userError } = await supabase
+            .from('users')
+            .insert({
+                email: `${username}@impulsa.local`,
+                password_hash: btoa(pwd),
+                full_name: `${firstName} ${lastName}`,
+                role: 'practicante',
+                is_active: true
+            })
+            .select()
+            .single();
+
+        if (userError) {
+            showError('participantError', 'Error al crear usuario');
+            return;
+        }
+
+        // Crear practitioner
+        const { error: practError } = await supabase
+            .from('practitioners')
+            .insert({
+                user_id: newUser.id,
+                first_name: firstName,
+                last_name: lastName,
+                username: username,
+                email: `${username}@impulsa.local`,
+                department: dept,
+                is_active: true
+            });
+
+        if (practError) {
+            showError('participantError', 'Error al crear participante');
+            return;
+        }
+
+        showSuccess('participantSuccess', `Participante creado - Contraseña: ${pwd}`);
+        setTimeout(() => {
+            document.getElementById('addParticipantModal').classList.remove('show');
+            document.getElementById('participantFirstName').value = '';
+            document.getElementById('participantLastName').value = '';
+            document.getElementById('participantUsername').value = '';
+            document.getElementById('participantPassword').value = '';
+            document.getElementById('participantDept').value = '';
+            loadPractitioners();
+        }, 2000);
+    }
+
+    async function editParticipant(participantId) {
+        const { data: participant, error } = await supabase
+            .from('practitioners')
+            .select('*')
+            .eq('id', participantId)
+            .single();
+
+        if (error) {
+            console.error(error);
+            return;
+        }
+
+        document.getElementById('editParticipantId').value = participantId;
+        document.getElementById('editParticipantName').textContent = `${participant.first_name} ${participant.last_name}`;
+        document.getElementById('editParticipantUsername').textContent = participant.username;
+        document.getElementById('currentPasswordDisplay').textContent = '••••••••';
+        document.getElementById('editParticipantPassword').value = '';
+        document.getElementById('statusActive').checked = participant.is_active;
+        document.getElementById('statusInactive').checked = !participant.is_active;
+
+        document.getElementById('editParticipantModal').classList.add('show');
+    }
+
+    async function saveEditParticipant() {
+        const id = document.getElementById('editParticipantId').value;
+        const newPassword = document.getElementById('editParticipantPassword').value;
+        const isActive = document.getElementById('statusActive').checked;
+
+        const updates = {
+            is_active: isActive,
+            updated_at: new Date().toISOString()
+        };
+
+        if (newPassword) {
+            updates.password_hash = btoa(newPassword);
+        }
+
+        const { error } = await supabase
+            .from('practitioners')
+            .update(updates)
+            .eq('id', id);
+
+        if (error) {
+            showError('editError', 'Error al guardar cambios');
+            return;
+        }
+
+        showSuccess('editSuccess', 'Participante actualizado');
+        setTimeout(() => {
+            document.getElementById('editParticipantModal').classList.remove('show');
+            loadPractitioners();
+        }, 1500);
+    }
+
+    async function deleteParticipant(participantId) {
+        if (!confirm('¿Estás seguro? Esta acción no se puede deshacer.')) return;
+
+        const { error } = await supabase
+            .from('practitioners')
+            .delete()
+            .eq('id', participantId);
+
+        if (error) {
+            alert('Error al eliminar');
+            return;
+        }
+
+        loadPractitioners();
+    }
+
+    async function changeAdminPassword() {
+        const current = document.getElementById('currentPassword').value;
+        const newPwd = document.getElementById('newPassword').value;
+        const confirm = document.getElementById('confirmPassword').value;
+
+        if (!current || !newPwd || !confirm) {
+            alert('Completa todos los campos');
+            return;
+        }
+
+        if (newPwd !== confirm) {
+            alert('Las contraseñas no coinciden');
+            return;
+        }
+
+        // Validar contraseña actual
+        if (!validatePassword(current, currentUser.password_hash)) {
+            alert('Contraseña actual incorrecta');
+            return;
+        }
+
+        // Actualizar
+        const { error } = await supabase
+            .from('users')
+            .update({ password_hash: btoa(newPwd) })
+            .eq('id', currentUser.id);
+
+        if (error) {
+            alert('Error al cambiar contraseña');
+            return;
+        }
+
+        alert('Contraseña cambiada exitosamente');
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+    }
+
+    // PRACTITIONER FUNCTIONS
+    async function loadPractitionerDashboard() {
+        const { data: practitioner } = await supabase
+            .from('practitioners')
+            .select('*, user_id (*)')
+            .eq('user_id', currentUser.id)
+            .single();
+
+        if (!practitioner) return;
+
+        // Cargar puntajes
+        const { data: submissions } = await supabase
+            .from('evaluation_submissions')
+            .select('*, evaluation_id (block_id (module_id))')
+            .eq('practitioner_id', practitioner.id);
+
+        let totalPoints = 0;
+        if (submissions) {
+            submissions.forEach(s => {
+                // Buscar puntuación
+            });
+        }
+
+        // Actualizar UI
+        document.getElementById('totalPointsPract').textContent = `${totalPoints} / 100`;
+        document.getElementById('progressFill').style.width = `${Math.min(totalPoints, 100)}%`;
+    }
+
+    async function loadPractitionerProfile() {
+        const { data: practitioner } = await supabase
+            .from('practitioners')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .single();
+
+        if (practitioner) {
+            document.getElementById('profileName').textContent = `${practitioner.first_name} ${practitioner.last_name}`;
+            document.getElementById('profileUsername').textContent = practitioner.username;
+            document.getElementById('profileEmail').textContent = practitioner.email || '-';
+            document.getElementById('profileDept').textContent = practitioner.department || '-';
+        }
+    }
+
+    async function changePractitionerPassword() {
+        const current = document.getElementById('practCurrentPassword').value;
+        const newPwd = document.getElementById('practNewPassword').value;
+        const confirm = document.getElementById('practConfirmPassword').value;
+
+        if (!current || !newPwd || !confirm) {
+            alert('Completa todos los campos');
+            return;
+        }
+
+        if (newPwd !== confirm) {
+            alert('Las contraseñas no coinciden');
+            return;
+        }
+
+        if (!validatePassword(current, currentUser.password_hash)) {
+            alert('Contraseña actual incorrecta');
+            return;
+        }
+
+        const { error } = await supabase
+            .from('users')
+            .update({ password_hash: btoa(newPwd) })
+            .eq('id', currentUser.id);
+
+        if (error) {
+            alert('Error al cambiar contraseña');
+            return;
+        }
+
+        alert('Contraseña cambiada exitosamente');
+        document.getElementById('practCurrentPassword').value = '';
+        document.getElementById('practNewPassword').value = '';
+        document.getElementById('practConfirmPassword').value = '';
+    }
+
+    async function loadScoresHistory() {
+        const { data: practitioner } = await supabase
+            .from('practitioners')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .single();
+
+        if (!practitioner) return;
+
+        const { data: scores } = await supabase
+            .from('evaluation_scores')
+            .select('*, submission_id (evaluation_id (name, block_id (name)))')
+            .eq('submission_id.practitioner_id', practitioner.id);
+
+        const html = scores ? scores.map(s => `
+            <div class="card" style="background: #f9f9f9; margin-bottom: 10px;">
+                <p><strong>Evaluación:</strong> ${s.submission_id?.evaluation_id?.name || '-'}</p>
+                <p><strong>Bloque:</strong> ${s.submission_id?.evaluation_id?.block_id?.name || '-'}</p>
+                <p><strong>Calificación:</strong> ${s.score} puntos</p>
+                <p><strong>Fecha:</strong> ${new Date(s.rated_at).toLocaleDateString()}</p>
+                ${s.feedback ? `<p><strong>Comentarios:</strong> ${s.feedback}</p>` : ''}
+            </div>
+        `).join('') : '<p>Sin calificaciones aún</p>';
+
+        document.getElementById('scoresHistoryContainer').innerHTML = html || '<p>Sin calificaciones aún</p>';
+    }
+
+    async function loadAdminReports() {
+        const { data: practitioners } = await supabase
+            .from('practitioners')
+            .select('*')
+            .eq('is_active', true);
+
+        let html = '';
+        if (practitioners) {
+            for (const p of practitioners) {
+                const { data: scores } = await supabase
+                    .from('evaluation_scores')
+                    .select('*')
+                    .eq('submission_id.practitioner_id', p.id);
+
+                const totalPoints = scores ? scores.reduce((sum, s) => sum + parseFloat(s.score || 0), 0) : 0;
+                const fname = (p.first_name || 'N/A').toString().trim();
+                const lname = (p.last_name || '').toString().trim();
+                const uname = (p.username || 'N/A').toString().trim();
+
+                html += `
+                    <div class="card" style="background: #f9f9f9; margin-bottom: 15px;">
+                        <h4>${fname} ${lname}</h4>
+                        <p><strong>Usuario:</strong> ${uname}</p>
+                        <p><strong>Total Puntos:</strong> ${totalPoints} / 100</p>
+                        <p><strong>Evaluaciones Completadas:</strong> ${scores?.length || 0}</p>
+                    </div>
+                `;
+            }
+        }
+
+        document.getElementById('reportsContainer').innerHTML = html || '<p>Sin datos</p>';
+    }
+
+    // UTILITY FUNCTIONS
+    function generatePassword() {
+        try {
+            const pwd = Math.random().toString(36).slice(-8);
+            return pwd ? pwd.toUpperCase() : 'Pass123456';
+        } catch (e) {
+            return 'Pass' + Math.random().toString().slice(2, 8);
+        }
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('show');
+    }
+
+    function showError(elementId, message) {
+        const el = document.getElementById(elementId);
+        el.textContent = message;
+        el.classList.add('show');
+    }
+
+    function showSuccess(elementId, message) {
+        const el = document.getElementById(elementId);
+        el.textContent = message;
+        el.classList.add('show');
+    }
+
+    function copyPassword() {
+        const pwd = document.getElementById('currentPasswordDisplay').textContent;
+        if (pwd !== '••••••••') {
+            navigator.clipboard.writeText(pwd);
+            alert('Contraseña copiada al portapapeles');
+        }
+    }
+
+    // LOGOUT
+    function logoutUser() {
+        if (confirm('¿Deseas cerrar sesión?')) {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+    }
+
+    // INIT
+    window.addEventListener('load', () => {
+        const saved = localStorage.getItem('currentUser');
+        if (saved) {
+            currentUser = JSON.parse(saved);
+            showApp();
+        }
+
+        // Cargar participantes para admin
+        if (currentUser?.role === 'admin') {
+            loadPractitioners();
+        }
+    });
+
+    // Cerrar modal al hacer click fuera
+    document.addEventListener('click', (e) => {
+        const modals = document.querySelectorAll('.modal.show');
+        modals.forEach(modal => {
+            if (e.target === modal) {
+                modal.classList.remove('show');
+            }
+        });
+    });
 </script>
 
 </body>
