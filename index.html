@@ -494,8 +494,8 @@
         <p>Portal de Evaluaciones del Programa IMPULSA RH</p>
         <p>Sistema integral de gestión de competencias y desarrollo profesional</p>
         <div style="margin-top: 40px; font-size: 0.9em; opacity: 0.8;">
-            <p><strong>Admin:</strong> selecciondetalentosarg@gmail.com</p>
-            <p><strong>Contraseña:</strong> PMConsultora26</p>
+            <p>Por favor, ingresa con tus credenciales de acceso.</p>
+            <p>Si no tienes acceso, contacta al administrador.</p>
         </div>
     </div>
     <div class="login-right">
@@ -817,7 +817,7 @@
 
     // LOGIN
     async function loginUser() {
-        const email = document.getElementById('loginEmail').value;
+        const email = document.getElementById('loginEmail').value.trim();
         const password = document.getElementById('loginPassword').value;
 
         if (!email || !password) {
@@ -825,37 +825,55 @@
             return;
         }
 
-        // Buscar usuario por email o username
-        let { data: users, error: userError } = await supabase
-            .from('users')
-            .select('*')
-            .or(`email.eq.${email},email.eq.${email}@empresa.com`);
+        try {
+            console.log('Intentando login con:', email);
 
-        if (userError || !users || users.length === 0) {
-            showLoginError('Usuario o contraseña incorrectos');
-            return;
+            // Buscar usuario por email
+            let { data: users, error: userError } = await supabase
+                .from('users')
+                .select('*')
+                .eq('email', email);
+
+            if (userError) {
+                console.error('Error en query:', userError);
+                showLoginError('Error de conexión a la base de datos');
+                return;
+            }
+
+            if (!users || users.length === 0) {
+                console.log('Usuario no encontrado:', email);
+                showLoginError('Usuario o contraseña incorrectos');
+                return;
+            }
+
+            const user = users[0];
+            console.log('Usuario encontrado:', user.full_name);
+
+            // Validar contraseña
+            if (!validatePassword(password, user.password_hash)) {
+                console.log('Contraseña incorrecta');
+                showLoginError('Usuario o contraseña incorrectos');
+                return;
+            }
+
+            console.log('✅ Login exitoso');
+
+            // Actualizar último login
+            await supabase
+                .from('users')
+                .update({ last_login: new Date().toISOString() })
+                .eq('id', user.id);
+
+            // Guardar en sesión
+            currentUser = user;
+            localStorage.setItem('currentUser', JSON.stringify(user));
+
+            // Mostrar app
+            showApp();
+        } catch (err) {
+            console.error('Error en loginUser:', err);
+            showLoginError('Error al conectar. Intenta de nuevo.');
         }
-
-        const user = users[0];
-
-        // Validar contraseña (en producción usar bcrypt)
-        if (!validatePassword(password, user.password_hash)) {
-            showLoginError('Usuario o contraseña incorrectos');
-            return;
-        }
-
-        // Actualizar último login
-        await supabase
-            .from('users')
-            .update({ last_login: new Date().toISOString() })
-            .eq('id', user.id);
-
-        // Guardar en sesión
-        currentUser = user;
-        localStorage.setItem('currentUser', JSON.stringify(user));
-
-        // Mostrar app
-        showApp();
     }
 
     function validatePassword(input, hash) {
