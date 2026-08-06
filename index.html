@@ -415,35 +415,79 @@
         }
     }
     
-    async function createPractitioner() {
+    function createPractitioner() {
         console.log('🔴 createPractitioner INICIADO');
         
+        // Crear modal HTML
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        `;
+        
+        modal.innerHTML = `
+            <div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                <h3 style="margin-bottom: 20px; color: #333;">Crear Participante</h3>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Nombre:</label>
+                    <input type="text" id="practName" placeholder="Juan" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: Arial;">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Apellido:</label>
+                    <input type="text" id="practLname" placeholder="Pérez" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: Arial;">
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Usuario:</label>
+                    <input type="text" id="practUser" placeholder="juan.perez" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: Arial;">
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" style="padding: 10px 20px; background: #ddd; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancelar</button>
+                    <button id="btnCreatePract" style="padding: 10px 20px; background: #404469; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Crear</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        document.getElementById('btnCreatePract').onclick = async function() {
+            const name = document.getElementById('practName').value.trim();
+            const lname = document.getElementById('practLname').value.trim();
+            const uname = document.getElementById('practUser').value.trim();
+            
+            console.log('📋 Valores:', name, lname, uname);
+            
+            if (!name || !lname || !uname) {
+                alert('Completa todos los campos');
+                return;
+            }
+            
+            modal.remove();
+            await doCreatePractitioner(name, lname, uname);
+        };
+        
+        document.getElementById('practName').focus();
+    }
+    
+    async function doCreatePractitioner(name, lname, uname) {
+        console.log('🔐 Creando:', name, lname, uname);
+        
         try {
-            const name = prompt('Nombre:');
-            console.log('1️⃣ Nombre:', name);
-            if (!name) {
-                console.log('❌ Nombre vacío');
-                return;
-            }
-            
-            const lname = prompt('Apellido:');
-            console.log('2️⃣ Apellido:', lname);
-            if (!lname) {
-                console.log('❌ Apellido vacío');
-                return;
-            }
-            
-            const uname = prompt('Usuario:');
-            console.log('3️⃣ Usuario:', uname);
-            if (!uname) {
-                console.log('❌ Usuario vacío');
-                return;
-            }
-            
             const pwd = Math.random().toString(36).slice(-8);
-            console.log('🔐 Contraseña generada:', pwd);
+            console.log('🔐 Contraseña:', pwd);
             
-            console.log('📡 Insertando en users table...');
+            console.log('📡 Insertando usuario...');
             const userResp = await db.from('users').insert({
                 email: `${uname}@impulsa.local`,
                 password_hash: pwd,
@@ -452,24 +496,22 @@
                 is_active: true
             }).select();
             
-            console.log('📦 User response:', userResp);
             const { data: newUser, error: errUser } = userResp;
+            console.log('📦 User response:', newUser, errUser);
             
             if (errUser) {
-                console.error('❌ Error users:', errUser);
-                alert('Error creando usuario: ' + errUser.message);
+                alert('Error usuario: ' + errUser.message);
                 return;
             }
             
-            if (!newUser || newUser.length === 0) {
-                console.error('❌ No se retornó usuario');
-                alert('Error: No se creó el usuario');
+            if (!newUser?.length) {
+                alert('Error: No se creó usuario');
                 return;
             }
             
-            console.log('✅ Usuario creado:', newUser[0].id);
+            console.log('✅ Usuario:', newUser[0].id);
             
-            console.log('📡 Insertando en practitioners table...');
+            console.log('📡 Insertando participante...');
             const practResp = await db.from('practitioners').insert({
                 user_id: newUser[0].id,
                 first_name: name,
@@ -479,25 +521,22 @@
                 is_active: true
             });
             
-            console.log('📦 Practitioner response:', practResp);
             const { error: errPract } = practResp;
+            console.log('📦 Pract response:', errPract);
             
             if (errPract) {
-                console.error('❌ Error practitioners:', errPract);
-                alert('Error creando participante: ' + errPract.message);
+                alert('Error participante: ' + errPract.message);
                 return;
             }
             
-            console.log('✅✅ PARTICIPANTE CREADO EXITOSAMENTE');
-            alert(`✅ Participante Creado\n\nUsuario: ${uname}\nContraseña: ${pwd}`);
+            console.log('✅✅ PARTICIPANTE CREADO');
+            alert(`✅ Participante Creado\n\nUsuario: ${uname}\nContraseña: ${pwd}\n\nGuarda estos datos`);
             
-            console.log('🔄 Recargando tablas...');
             await loadPractTable();
             await loadDash();
-            console.log('✅ Tablas recargadas');
             
         } catch (e) {
-            console.error('❌ EXCEPCIÓN:', e);
+            console.error('❌ Error:', e);
             alert('Error: ' + e.message);
         }
     }
