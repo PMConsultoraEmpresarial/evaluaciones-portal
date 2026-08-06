@@ -392,12 +392,25 @@
     }
     
     async function toggleBlock(id, pub) {
+        console.log('🔄 toggleBlock:', id, pub);
         try {
-            await db.from('blocks').update({ is_published: pub, published_at: pub ? new Date().toISOString() : null }).eq('id', id);
-            alert(pub ? 'Bloque publicado' : 'Bloque despublicado');
-            loadMods();
-            loadDash();
+            console.log('📡 Enviando update...');
+            const resp = await db.from('blocks').update({ is_published: pub, published_at: pub ? new Date().toISOString() : null }).eq('id', id);
+            console.log('📦 Response:', resp);
+            
+            const { error } = resp;
+            if (error) {
+                console.error('❌ Error:', error);
+                alert('Error: ' + error.message);
+                return;
+            }
+            
+            console.log('✅ Bloque actualizado');
+            alert(pub ? '✅ Bloque publicado' : '✅ Bloque despublicado');
+            await loadMods();
+            await loadDash();
         } catch (e) {
+            console.error('❌ Exception:', e);
             alert('Error: ' + e.message);
         }
     }
@@ -411,9 +424,11 @@
         if (!uname) return;
         
         const pwd = Math.random().toString(36).slice(-8);
+        console.log('👤 Creando participante:', name, lname, uname);
         
         try {
-            const { data: newUser } = await db.from('users').insert({
+            console.log('1️⃣ Insertando en users...');
+            const userResp = await db.from('users').insert({
                 email: `${uname}@impulsa.local`,
                 password_hash: pwd,
                 full_name: `${name} ${lname}`,
@@ -421,21 +436,47 @@
                 is_active: true
             }).select();
             
-            if (newUser?.length) {
-                await db.from('practitioners').insert({
-                    user_id: newUser[0].id,
-                    first_name: name,
-                    last_name: lname,
-                    username: uname,
-                    email: `${uname}@impulsa.local`,
-                    is_active: true
-                });
-                
-                alert(`Participante Creado\n\nUsuario: ${uname}\nContraseña: ${pwd}`);
-                loadPractTable();
-                loadDash();
+            console.log('📦 User response:', userResp);
+            const { data: newUser, error: errUser } = userResp;
+            console.log('📊 newUser:', newUser);
+            
+            if (errUser) {
+                console.error('❌ Error en users:', errUser);
+                alert('Error: ' + errUser.message);
+                return;
             }
+            
+            if (!newUser || newUser.length === 0) {
+                console.error('❌ newUser vacío');
+                alert('Error: No se creó el usuario');
+                return;
+            }
+            
+            console.log('2️⃣ Insertando en practitioners...');
+            const practResp = await db.from('practitioners').insert({
+                user_id: newUser[0].id,
+                first_name: name,
+                last_name: lname,
+                username: uname,
+                email: `${uname}@impulsa.local`,
+                is_active: true
+            });
+            
+            console.log('📦 Pract response:', practResp);
+            const { error: errPract } = practResp;
+            
+            if (errPract) {
+                console.error('❌ Error en practitioners:', errPract);
+                alert('Error: ' + errPract.message);
+                return;
+            }
+            
+            console.log('✅ Participante creado exitosamente');
+            alert(`✅ Participante Creado\n\nUsuario: ${uname}\nContraseña: ${pwd}`);
+            await loadPractTable();
+            await loadDash();
         } catch (e) {
+            console.error('❌ Exception:', e);
             alert('Error: ' + e.message);
         }
     }
