@@ -85,16 +85,15 @@
         
         .btn { display: inline-block; padding: 10px 16px; background: #404469; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; font-size: 0.9em; margin: 5px 5px 5px 0; }
         .btn:hover { background: #E94D9A; }
-        .btn-add { margin-bottom: 20px; }
+        .btn svg { width: 12px; height: 12px; display: inline; margin-right: 4px; vertical-align: middle; }
         
         .blockItem { background: #F5F5FA; padding: 16px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #404469; display: flex; justify-content: space-between; align-items: center; }
         .blockInfo strong { display: block; color: #333333; margin-bottom: 4px; }
         .blockInfo p { font-size: 0.9em; color: #777777; }
-        .blockState { font-size: 0.85em; margin-top: 4px; }
-        .blockState.pub { color: #059669; }
-        .blockState.priv { color: #DC2626; }
         
         .empty { text-align: center; padding: 40px; color: #999999; }
+        
+        input[type="text"], input[type="password"] { font-family: 'Inter', sans-serif; }
     </style>
 </head>
 <body>
@@ -104,13 +103,17 @@
     <p>Portal de Evaluaciones - Selecciona tu tipo de acceso</p>
     <div class="roleCards">
         <div class="roleCard" onclick="selectRole('admin')">
-            <div class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></div>
+            <div class="icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+            </div>
             <h3>Administrador</h3>
             <p>Gestiona participantes y publica contenido</p>
             <div class="arrow">→</div>
         </div>
         <div class="roleCard" onclick="selectRole('practicante')">
-            <div class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg></div>
+            <div class="icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>
+            </div>
             <h3>Practicante</h3>
             <p>Accede a tus evaluaciones y avances</p>
             <div class="arrow">→</div>
@@ -168,25 +171,14 @@
             <div id="pract" class="section">
                 <div class="card">
                     <h3>Participantes</h3>
-                    
                     <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
-                        <button class="btn btn-add" onclick="createPractitioner()">+ Agregar Participante</button>
-                        <input type="text" id="searchPract" placeholder="🔍 Buscar por nombre o usuario..." 
-                            style="flex: 1; padding: 10px 14px; border: 1.5px solid #E5E5E5; border-radius: 8px; font-family: 'Inter', sans-serif;"
-                            onkeyup="filterPractTable()">
+                        <button class="btn" onclick="createPractitioner()">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+                            Agregar Participante
+                        </button>
+                        <input type="text" id="searchPract" placeholder="🔍 Buscar..." style="flex: 1; padding: 10px 14px; border: 1.5px solid #E5E5E5; border-radius: 8px;" onkeyup="filterPractTable()">
                     </div>
-                    
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Usuario</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="practTable"></tbody>
-                    </table>
+                    <table><thead><tr><th>Nombre</th><th>Usuario</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="practTable"></tbody></table>
                 </div>
             </div>
             
@@ -194,6 +186,24 @@
                 <div class="card">
                     <h3>Módulos y Bloques</h3>
                     <div id="modsContainer"></div>
+                </div>
+            </div>
+            
+            <div id="config" class="section">
+                <div class="card">
+                    <h3>Gestión de Participantes</h3>
+                    <div id="configPractTable"></div>
+                </div>
+                <div class="card">
+                    <h3>Información de Administrador</h3>
+                    <div style="background: #F5F5FA; padding: 20px; border-radius: 12px;">
+                        <p style="margin: 10px 0;"><strong>Nombre:</strong> <span id="configAdminName">-</span></p>
+                        <p style="margin: 10px 0;"><strong>Email:</strong> <span id="configAdminEmail">-</span></p>
+                        <button class="btn" style="margin-top: 15px;" onclick="showAdminChangePasswordModal()">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            Cambiar Contraseña
+                        </button>
+                    </div>
                 </div>
             </div>
             
@@ -211,32 +221,6 @@
                     <p><strong>Usuario:</strong> <span id="profUser">-</span></p>
                 </div>
             </div>
-            
-            <div id="config" class="section">
-                <div class="card">
-                    <h3>⚙️ Configuración del Sistema</h3>
-                    
-                    <div style="background: #F5F5FA; padding: 20px; border-radius: 12px; margin-bottom: 25px;">
-                        <h4 style="margin-bottom: 15px; color: #333; font-size: 1.1em;">📊 Información de Admin</h4>
-                        <p style="margin: 8px 0;"><strong>Nombre:</strong> <span id="configAdminName">-</span></p>
-                        <p style="margin: 8px 0;"><strong>Email:</strong> <span id="configAdminEmail">-</span></p>
-                        <p style="margin: 8px 0;"><strong>Rol:</strong> <span id="configAdminRole" style="background: #E94D9A; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.9em;">Administrador</span></p>
-                        <p style="margin: 8px 0;"><strong>Estado:</strong> <span style="background: #059669; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.9em;">Activo</span></p>
-                        <button class="btn" style="margin-top: 15px;" onclick="showAdminChangePasswordModal()">🔑 Cambiar Contraseña</button>
-                    </div>
-                    
-                    <div style="background: #F5F5FA; padding: 20px; border-radius: 12px;">
-                        <h4 style="margin-bottom: 15px; color: #333; font-size: 1.1em;">📈 Estadísticas del Sistema</h4>
-                        <p style="margin: 8px 0;"><strong>Total Participantes:</strong> <span id="configTotalPract" style="font-weight: 700; color: #404469;">0</span></p>
-                        <p style="margin: 8px 0;"><strong>Participantes Activos:</strong> <span id="configActivePract" style="font-weight: 700; color: #059669;">0</span></p>
-                        <p style="margin: 8px 0;"><strong>Participantes Inactivos:</strong> <span id="configInactivePract" style="font-weight: 700; color: #DC2626;">0</span></p>
-                        <p style="margin: 8px 0; border-top: 1px solid #E5E5E5; padding-top: 12px; margin-top: 12px;"><strong>Total Módulos:</strong> <span id="configTotalMods" style="font-weight: 700; color: #404469;">0</span></p>
-                        <p style="margin: 8px 0;"><strong>Total Bloques:</strong> <span id="configTotalBlocks" style="font-weight: 700; color: #404469;">0</span></p>
-                        <p style="margin: 8px 0;"><strong>Bloques Publicados:</strong> <span id="configPublishedBlocks" style="font-weight: 700; color: #059669;">0</span></p>
-                        <p style="margin: 8px 0;"><strong>Bloques Privados:</strong> <span id="configPrivateBlocks" style="font-weight: 700; color: #DC2626;">0</span></p>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -247,10 +231,11 @@
     
     let db = null;
     let currentUser = null;
+    let allPractitioners = [];
     
     function initDB() {
         db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        console.log('✅ Supabase OK');
+        console.log('✅ Supabase inicializado');
     }
     
     function selectRole(role) {
@@ -278,118 +263,68 @@
         const email = document.getElementById('email').value.trim();
         const pass = document.getElementById('password').value;
         
-        console.log('🔐 Login attempt:', email);
-        
         if (!email || !pass) {
             showError('Completa email y contraseña');
             return;
         }
         
         try {
-            console.log('📡 Querying users table...');
-            const response = await db.from('users').select('*').eq('email', email);
-            console.log('📦 Response:', response);
-            
-            const { data, error } = response;
-            console.log('📊 Data:', data);
-            console.log('⚠️ Error:', error);
+            const { data, error } = await db.from('users').select('*').eq('email', email);
             
             if (error) {
-                console.error('❌ Error BD:', error);
-                showError('Error BD: ' + (error?.message || 'Desconocido'));
+                showError('Error BD');
                 return;
             }
             
-            if (!data || data.length === 0) {
-                console.log('❌ No user found');
+            if (!data?.length) {
                 showError('Email no encontrado');
                 return;
             }
             
             const user = data[0];
-            console.log('✅ User found:', user.full_name);
-            
             if (user.password_hash !== pass) {
-                console.log('❌ Wrong password');
                 showError('Contraseña incorrecta');
                 return;
             }
             
-            console.log('✅✅ Login SUCCESS');
             currentUser = user;
             localStorage.user = JSON.stringify(currentUser);
-            console.log('💾 User saved to localStorage');
-            
             await showApp();
-            console.log('🎉 App fully loaded');
         } catch (e) {
-            console.error('❌ Exception:', e);
             showError('Error: ' + e.message);
         }
     }
     
     async function showApp() {
-        console.log('🎯 showApp iniciado');
-        console.log('👤 currentUser:', currentUser);
-        
-        const loginEl = document.getElementById('loginPage');
-        const appEl = document.getElementById('app');
-        console.log('📍 loginPage:', loginEl, 'app:', appEl);
-        
-        loginEl.classList.remove('active');
-        console.log('✅ Login hidden');
-        
-        appEl.classList.add('active');
-        console.log('✅ App shown');
-        
+        document.getElementById('loginPage').classList.remove('active');
+        document.getElementById('app').classList.add('active');
         document.getElementById('userName').textContent = currentUser.full_name;
-        console.log('✅ Username set:', currentUser.full_name);
         
         if (currentUser.role === 'admin') {
-            console.log('👨‍💼 Admin detected - loading dashboard');
             document.getElementById('adminMenu').classList.add('active');
             await loadDash();
-            console.log('✅ Dashboard loaded');
         } else {
-            console.log('📋 Practicante detected - loading evals');
             document.getElementById('practMenu').classList.add('active');
             await loadEvals();
-            console.log('✅ Evals loaded');
         }
     }
     
     async function loadDash() {
         try {
-            console.log('📊 loadDash iniciado');
-            
-            const pResp = await db.from('practitioners').select('*');
-            console.log('1️⃣ Practitioners:', pResp);
-            const { data: pract } = pResp;
-            
-            const mResp = await db.from('modules').select('*');
-            console.log('2️⃣ Modules:', mResp);
-            const { data: mods } = mResp;
-            
-            const bResp = await db.from('blocks').select('*').eq('is_published', true);
-            console.log('3️⃣ Blocks:', bResp);
-            const { data: blocks } = bResp;
+            const { data: pract } = await db.from('practitioners').select('*');
+            const { data: mods } = await db.from('modules').select('*');
+            const { data: blocks } = await db.from('blocks').select('*').eq('is_published', true);
             
             document.getElementById('countPract').textContent = pract?.length || 0;
             document.getElementById('countMods').textContent = mods?.length || 0;
             document.getElementById('countBlocks').textContent = blocks?.length || 0;
-            console.log('✅ Stats updated');
             
             await loadPractTable();
-            console.log('✅ Pract table loaded');
-            
             await loadMods();
-            console.log('✅ Modules loaded');
         } catch (e) {
-            console.error('❌ loadDash error:', e);
+            console.error('Error:', e);
         }
     }
-    
-    let allPractitioners = [];
     
     async function loadPractTable() {
         try {
@@ -407,16 +342,22 @@
         
         if (data?.length) {
             data.forEach(p => {
-                const estatoBtn = p.is_active ? '✅ Activo' : '⭕ Inactivo';
                 const btnColor = p.is_active ? '#059669' : '#999999';
+                const btnText = p.is_active ? 'Desactivar' : 'Activar';
                 
                 tb.innerHTML += `<tr>
                     <td><strong>${p.first_name} ${p.last_name}</strong></td>
                     <td>${p.username}</td>
                     <td><span class="badge ${p.is_active ? 'badge-active' : 'badge-inactive'}">${p.is_active ? 'Activo' : 'Inactivo'}</span></td>
                     <td>
-                        <button class="btn" style="background: ${btnColor}; padding: 6px 12px; font-size: 0.8em; margin-right: 5px;" onclick="togglePractState('${p.id}', ${!p.is_active})">${p.is_active ? '🔒 Desactivar' : '🔓 Activar'}</button>
-                        <button class="btn" style="background: #404469; padding: 6px 12px; font-size: 0.8em;" onclick="showChangePasswordModal('${p.id}', '${p.username}', '${p.first_name} ${p.last_name}')">🔑 Contraseña</button>
+                        <button class="btn" style="background: ${btnColor}; padding: 6px 10px; font-size: 0.8em; margin-right: 4px;" onclick="togglePractState('${p.id}', ${!p.is_active})">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+                            ${btnText}
+                        </button>
+                        <button class="btn" style="background: #404469; padding: 6px 10px; font-size: 0.8em;" onclick="showPractChangePasswordModal('${p.id}', '${p.username}', '${p.first_name} ${p.last_name}')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            Contraseña
+                        </button>
                     </td>
                 </tr>`;
             });
@@ -443,8 +384,6 @@
     }
     
     async function togglePractState(practId, newState) {
-        console.log('🔄 Toggleando estado:', practId, newState);
-        
         try {
             const { error } = await db.from('practitioners')
                 .update({ is_active: newState })
@@ -455,7 +394,7 @@
                 return;
             }
             
-            alert(newState ? '✅ Participante activado' : '⭕ Participante desactivado');
+            alert(newState ? '✅ Participante activado' : '✅ Participante desactivado');
             await loadPractTable();
             await loadDash();
         } catch (e) {
@@ -463,68 +402,51 @@
         }
     }
     
-    function showChangePasswordModal(practId, username, fullName) {
-        console.log('🔐 Modal contraseña:', username);
-        
+    function showPractChangePasswordModal(practId, username, fullName) {
         const modal = document.createElement('div');
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        `;
-        
-        const pwd = Math.random().toString(36).slice(-8);
+        modal.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;`;
         
         modal.innerHTML = `
             <div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 450px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
-                <h3 style="margin-bottom: 20px; color: #333;">Cambiar Contraseña</h3>
-                
+                <h3 style="margin-bottom: 20px; color: #333;">Establecer Contraseña</h3>
                 <div style="background: #F5F5FA; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                     <p style="margin: 5px 0; color: #666;"><strong>Participante:</strong> ${fullName}</p>
                     <p style="margin: 5px 0; color: #666;"><strong>Usuario:</strong> ${username}</p>
                 </div>
-                
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Nueva Contraseña:</label>
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" id="newPwd" value="${pwd}" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: monospace;" readonly>
-                        <button onclick="navigator.clipboard.writeText('${pwd}'); alert('✅ Copiado!')" style="padding: 10px 15px; background: #E94D9A; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">📋 Copiar</button>
-                    </div>
+                    <input type="password" id="practNewPwd" placeholder="Ingresa la contraseña" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
                 </div>
-                
                 <div style="margin-bottom: 20px;">
-                    <button id="btnGenerar" onclick="this.previousElementSibling.querySelector('input').value = Math.random().toString(36).slice(-8); alert('Nueva contraseña generada')" style="width: 100%; padding: 10px; background: #404469; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin-bottom: 10px;">🔄 Generar Otra</button>
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" onchange="document.getElementById('practNewPwd').type = this.checked ? 'text' : 'password'" style="margin-right: 8px;">
+                        <span style="color: #666;">Mostrar contraseña</span>
+                    </label>
                 </div>
-                
                 <div style="display: flex; gap: 10px; justify-content: flex-end;">
                     <button onclick="this.parentElement.parentElement.parentElement.remove()" style="padding: 10px 20px; background: #ddd; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancelar</button>
-                    <button id="btnGuardarPwd" style="padding: 10px 20px; background: #059669; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">✅ Guardar</button>
+                    <button id="btnGuardarPractPwd" style="padding: 10px 20px; background: #059669; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">✅ Guardar</button>
                 </div>
             </div>
         `;
         
         document.body.appendChild(modal);
         
-        document.getElementById('btnGuardarPwd').onclick = async function() {
-            const newPassword = document.getElementById('newPwd').value;
-            console.log('💾 Guardando contraseña:', newPassword);
+        document.getElementById('btnGuardarPractPwd').onclick = async function() {
+            const newPassword = document.getElementById('practNewPwd').value.trim();
+            if (!newPassword) {
+                alert('Ingresa una contraseña');
+                return;
+            }
             modal.remove();
-            await doChangePassword(practId, newPassword, username);
+            await doChangePractPassword(practId, newPassword, username);
         };
+        
+        document.getElementById('practNewPwd').focus();
     }
     
-    async function doChangePassword(practId, newPassword, username) {
+    async function doChangePractPassword(practId, newPassword, username) {
         try {
-            console.log('📡 Actualizando contraseña en users...');
-            
-            // Primero obtener el user_id del participante
             const { data: pract } = await db.from('practitioners').select('user_id').eq('id', practId);
             
             if (!pract?.length) {
@@ -532,117 +454,41 @@
                 return;
             }
             
-            const userId = pract[0].user_id;
-            
-            // Actualizar password_hash en users
             const { error } = await db.from('users')
                 .update({ password_hash: newPassword })
-                .eq('id', userId);
+                .eq('id', pract[0].user_id);
             
             if (error) {
                 alert('Error: ' + error.message);
                 return;
             }
             
-            console.log('✅ Contraseña actualizada');
-            alert(`✅ Contraseña Actualizada\n\nUsuario: ${username}\nNueva Contraseña: ${newPassword}\n\nGuarda este dato`);
-            
+            alert(`✅ Contraseña Actualizada\n\nUsuario: ${username}\nContraseña: ${newPassword}`);
             await loadPractTable();
         } catch (e) {
-            console.error('Error:', e);
-            alert('Error: ' + e.message);
-        }
-    }
-    
-    async function loadMods() {
-        try {
-            const { data: mods } = await db.from('modules').select('*').order('order_number');
-            const { data: blocks } = await db.from('blocks').select('*').order('order_number');
-            
-            const div = document.getElementById('modsContainer');
-            div.innerHTML = '';
-            
-            if (mods?.length) {
-                mods.forEach(m => {
-                    const myBlocks = blocks.filter(b => b.module_id === m.id) || [];
-                    let html = `<div style="margin-bottom: 30px;"><h4 style="font-size: 1.1em; font-weight: 600; margin-bottom: 15px; color: #333;">${m.name}</h4><p style="font-size: 0.9em; color: #777; margin-bottom: 12px;">Puntos: <strong>${m.total_points}</strong></p>`;
-                    
-                    myBlocks.forEach(b => {
-                        const estado = b.is_published ? 'PUBLICADO' : 'PRIVADO';
-                        const btn = b.is_published ? 'Despublicar' : 'Publicar';
-                        html += `<div class="blockItem"><div class="blockInfo"><strong>${b.name}</strong><p>Puntos: ${b.total_points}</p><p class="blockState ${b.is_published ? 'pub' : 'priv'}">${estado}</p></div><button class="btn" onclick="toggleBlock(${b.id}, ${!b.is_published})">${btn}</button></div>`;
-                    });
-                    
-                    html += `</div>`;
-                    div.innerHTML += html;
-                });
-            }
-        } catch (e) {
-            console.error('Error:', e);
-        }
-    }
-    
-    async function toggleBlock(id, pub) {
-        console.log('🔄 toggleBlock:', id, pub);
-        try {
-            console.log('📡 Enviando update...');
-            const resp = await db.from('blocks').update({ is_published: pub, published_at: pub ? new Date().toISOString() : null }).eq('id', id);
-            console.log('📦 Response:', resp);
-            
-            const { error } = resp;
-            if (error) {
-                console.error('❌ Error:', error);
-                alert('Error: ' + error.message);
-                return;
-            }
-            
-            console.log('✅ Bloque actualizado');
-            alert(pub ? '✅ Bloque publicado' : '✅ Bloque despublicado');
-            await loadMods();
-            await loadDash();
-        } catch (e) {
-            console.error('❌ Exception:', e);
             alert('Error: ' + e.message);
         }
     }
     
     function createPractitioner() {
-        console.log('🔴 createPractitioner INICIADO');
-        
-        // Crear modal HTML
         const modal = document.createElement('div');
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        `;
+        modal.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;`;
         
         modal.innerHTML = `
             <div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
                 <h3 style="margin-bottom: 20px; color: #333;">Crear Participante</h3>
-                
                 <div style="margin-bottom: 15px;">
                     <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Nombre:</label>
-                    <input type="text" id="practName" placeholder="Juan" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: Arial;">
+                    <input type="text" id="practName" placeholder="Juan" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
                 </div>
-                
                 <div style="margin-bottom: 15px;">
                     <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Apellido:</label>
-                    <input type="text" id="practLname" placeholder="Pérez" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: Arial;">
+                    <input type="text" id="practLname" placeholder="Pérez" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
                 </div>
-                
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; font-weight: 600; margin-bottom: 5px; color: #333;">Usuario:</label>
-                    <input type="text" id="practUser" placeholder="juan.perez" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: Arial;">
+                    <input type="text" id="practUser" placeholder="juan.perez" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
                 </div>
-                
                 <div style="display: flex; gap: 10px; justify-content: flex-end;">
                     <button onclick="this.parentElement.parentElement.parentElement.remove()" style="padding: 10px 20px; background: #ddd; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancelar</button>
                     <button id="btnCreatePract" style="padding: 10px 20px; background: #404469; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Crear</button>
@@ -657,8 +503,6 @@
             const lname = document.getElementById('practLname').value.trim();
             const uname = document.getElementById('practUser').value.trim();
             
-            console.log('📋 Valores:', name, lname, uname);
-            
             if (!name || !lname || !uname) {
                 alert('Completa todos los campos');
                 return;
@@ -672,14 +516,10 @@
     }
     
     async function doCreatePractitioner(name, lname, uname) {
-        console.log('🔐 Creando:', name, lname, uname);
-        
         try {
             const pwd = Math.random().toString(36).slice(-8);
-            console.log('🔐 Contraseña:', pwd);
             
-            console.log('📡 Insertando usuario...');
-            const userResp = await db.from('users').insert({
+            const { data: newUser, error: errUser } = await db.from('users').insert({
                 email: `${uname}@impulsa.local`,
                 password_hash: pwd,
                 full_name: `${name} ${lname}`,
@@ -687,23 +527,12 @@
                 is_active: true
             }).select();
             
-            const { data: newUser, error: errUser } = userResp;
-            console.log('📦 User response:', newUser, errUser);
-            
-            if (errUser) {
-                alert('Error usuario: ' + errUser.message);
+            if (errUser || !newUser?.length) {
+                alert('Error creando usuario');
                 return;
             }
             
-            if (!newUser?.length) {
-                alert('Error: No se creó usuario');
-                return;
-            }
-            
-            console.log('✅ Usuario:', newUser[0].id);
-            
-            console.log('📡 Insertando participante...');
-            const practResp = await db.from('practitioners').insert({
+            const { error: errPract } = await db.from('practitioners').insert({
                 user_id: newUser[0].id,
                 first_name: name,
                 last_name: lname,
@@ -712,216 +541,98 @@
                 is_active: true
             });
             
-            const { error: errPract } = practResp;
-            console.log('📦 Pract response:', errPract);
-            
             if (errPract) {
-                alert('Error participante: ' + errPract.message);
+                alert('Error: ' + errPract.message);
                 return;
             }
             
-            console.log('✅✅ PARTICIPANTE CREADO');
-            alert(`✅ Participante Creado\n\nUsuario: ${uname}\nContraseña: ${pwd}\n\nGuarda estos datos`);
-            
+            alert(`✅ Participante Creado\n\nUsuario: ${uname}\nContraseña: ${pwd}`);
             await loadPractTable();
             await loadDash();
-            
         } catch (e) {
-            console.error('❌ Error:', e);
             alert('Error: ' + e.message);
         }
     }
     
-    async function loadEvals() {
+    async function loadMods() {
         try {
-            const { data: blocks } = await db.from('blocks').select('*').eq('is_published', true).order('module_id');
-            const div = document.getElementById('evalContainer');
+            const { data: mods } = await db.from('modules').select('*').order('order_number');
+            const { data: blocks } = await db.from('blocks').select('*').order('order_number');
+            
+            const div = document.getElementById('modsContainer');
             div.innerHTML = '';
             
-            if (blocks?.length) {
-                blocks.forEach(b => {
-                    div.innerHTML += `<div class="blockItem"><div class="blockInfo"><strong>${b.name}</strong><p>Puntos: ${b.total_points}</p><p class="blockState pub">Disponible</p></div></div>`;
+            if (mods?.length) {
+                mods.forEach(m => {
+                    const myBlocks = blocks?.filter(b => b.module_id === m.id) || [];
+                    let html = `<div style="margin-bottom: 30px;"><h4 style="font-size: 1.1em; font-weight: 600; margin-bottom: 15px; color: #333;">${m.name}</h4>`;
+                    
+                    myBlocks.forEach(b => {
+                        const estado = b.is_published ? 'PUBLICADO' : 'PRIVADO';
+                        const btn = b.is_published ? 'Despublicar' : 'Publicar';
+                        html += `<div class="blockItem"><div class="blockInfo"><strong>${b.name}</strong><p>Puntos: ${b.total_points}</p></div><button class="btn" style="padding: 6px 10px; font-size: 0.8em;" onclick="toggleBlock(${b.id}, ${!b.is_published})">${btn}</button></div>`;
+                    });
+                    
+                    html += `</div>`;
+                    div.innerHTML += html;
                 });
-            } else {
-                div.innerHTML = '<div class="empty">No hay evaluaciones disponibles</div>';
             }
         } catch (e) {
             console.error('Error:', e);
         }
     }
     
-    async function loadConfig() {
-        console.log('⚙️ Cargando configuración...');
-        
+    async function toggleBlock(id, pub) {
         try {
-            // Cargar datos del admin actual
-            document.getElementById('configAdminName').textContent = currentUser.full_name;
-            document.getElementById('configAdminEmail').textContent = currentUser.email;
-            console.log('✅ Datos admin cargados');
-            
-            // Cargar estadísticas
-            const { data: allPract } = await db.from('practitioners').select('*');
-            const { data: allMods } = await db.from('modules').select('*');
-            const { data: allBlocks } = await db.from('blocks').select('*');
-            
-            const totalPract = allPract?.length || 0;
-            const activePract = allPract?.filter(p => p.is_active).length || 0;
-            const inactivePract = totalPract - activePract;
-            const totalMods = allMods?.length || 0;
-            const totalBlocks = allBlocks?.length || 0;
-            const publishedBlocks = allBlocks?.filter(b => b.is_published).length || 0;
-            const privateBlocks = totalBlocks - publishedBlocks;
-            
-            document.getElementById('configTotalPract').textContent = totalPract;
-            document.getElementById('configActivePract').textContent = activePract;
-            document.getElementById('configInactivePract').textContent = inactivePract;
-            document.getElementById('configTotalMods').textContent = totalMods;
-            document.getElementById('configTotalBlocks').textContent = totalBlocks;
-            document.getElementById('configPublishedBlocks').textContent = publishedBlocks;
-            document.getElementById('configPrivateBlocks').textContent = privateBlocks;
-            
-            console.log('✅ Estadísticas cargadas');
+            await db.from('blocks').update({ is_published: pub, published_at: pub ? new Date().toISOString() : null }).eq('id', id);
+            alert(pub ? '✅ Bloque publicado' : '✅ Bloque despublicado');
+            await loadMods();
+            await loadDash();
         } catch (e) {
-            console.error('❌ Error cargando configuración:', e);
-        }
-    }
-    
-    function showAdminChangePasswordModal() {
-        console.log('🔐 Modal contraseña admin');
-        
-        const modal = document.createElement('div');
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        `;
-        
-        const pwd = Math.random().toString(36).slice(-8);
-        
-        modal.innerHTML = `
-            <div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 450px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
-                <h3 style="margin-bottom: 20px; color: #333;">Cambiar Contraseña de Admin</h3>
-                
-                <div style="background: #F5F5FA; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                    <p style="margin: 5px 0; color: #666;"><strong>Nombre:</strong> ${currentUser.full_name}</p>
-                    <p style="margin: 5px 0; color: #666;"><strong>Email:</strong> ${currentUser.email}</p>
-                </div>
-                
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Nueva Contraseña:</label>
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" id="newAdminPwd" value="${pwd}" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: monospace;" readonly>
-                        <button onclick="navigator.clipboard.writeText('${pwd}'); alert('✅ Copiado!')" style="padding: 10px 15px; background: #E94D9A; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">📋 Copiar</button>
-                    </div>
-                </div>
-                
-                <div style="margin-bottom: 20px;">
-                    <button onclick="document.getElementById('newAdminPwd').value = Math.random().toString(36).slice(-8); alert('Nueva contraseña generada')" style="width: 100%; padding: 10px; background: #404469; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin-bottom: 10px;">🔄 Generar Otra</button>
-                </div>
-                
-                <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                    <button onclick="this.parentElement.parentElement.parentElement.remove()" style="padding: 10px 20px; background: #ddd; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancelar</button>
-                    <button id="btnGuardarAdminPwd" style="padding: 10px 20px; background: #059669; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">✅ Guardar</button>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        document.getElementById('btnGuardarAdminPwd').onclick = async function() {
-            const newPassword = document.getElementById('newAdminPwd').value;
-            console.log('💾 Guardando contraseña admin');
-            modal.remove();
-            await doChangeAdminPassword(newPassword);
-        };
-    }
-    
-    async function doChangeAdminPassword(newPassword) {
-        try {
-            console.log('📡 Actualizando contraseña en BD...');
-            
-            const { error } = await db.from('users')
-                .update({ password_hash: newPassword })
-                .eq('id', currentUser.id);
-            
-            if (error) {
-                alert('Error: ' + error.message);
-                return;
-            }
-            
-            console.log('✅ Contraseña actualizada');
-            alert(`✅ Contraseña Actualizada\n\nEmail: ${currentUser.email}\nNueva Contraseña: ${newPassword}\n\nGuarda este dato en un lugar seguro`);
-            
-            // Actualizar en localStorage
-            currentUser.password_hash = newPassword;
-            localStorage.user = JSON.stringify(currentUser);
-            
-        } catch (e) {
-            console.error('Error:', e);
             alert('Error: ' + e.message);
         }
     }
     
-    function goSection(id) {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.querySelectorAll('.sidebarItem').forEach(i => i.classList.remove('active'));
-        event.target.classList.add('active');
-        const titles = { dash: 'Dashboard', pract: 'Participantes', mods: 'Módulos', eval: 'Mis Evaluaciones', prof: 'Mi Perfil', config: '⚙️ Configuración' };
-        document.getElementById('pageTitle').textContent = titles[id] || 'Portal';
-        
-        if (id === 'config') {
-            loadConfig();
-        }
-    }
-    
     async function loadConfig() {
-        console.log('⚙️ Cargando configuración...');
         try {
             document.getElementById('configAdminName').textContent = currentUser.full_name;
             document.getElementById('configAdminEmail').textContent = currentUser.email;
-            
-            const { data: allPract } = await db.from('practitioners').select('*');
-            const { data: allMods } = await db.from('modules').select('*');
-            const { data: allBlocks } = await db.from('blocks').select('*');
-            
-            const totalPract = allPract?.length || 0;
-            const activePract = allPract?.filter(p => p.is_active).length || 0;
-            const inactivePract = totalPract - activePract;
-            const totalMods = allMods?.length || 0;
-            const totalBlocks = allBlocks?.length || 0;
-            const publishedBlocks = allBlocks?.filter(b => b.is_published).length || 0;
-            const privateBlocks = totalBlocks - publishedBlocks;
-            
-            document.getElementById('configTotalPract').textContent = totalPract;
-            document.getElementById('configActivePract').textContent = activePract;
-            document.getElementById('configInactivePract').textContent = inactivePract;
-            document.getElementById('configTotalMods').textContent = totalMods;
-            document.getElementById('configTotalBlocks').textContent = totalBlocks;
-            document.getElementById('configPublishedBlocks').textContent = publishedBlocks;
-            document.getElementById('configPrivateBlocks').textContent = privateBlocks;
-            
-            console.log('✅ Estadísticas cargadas');
+            await loadConfigPractitioners();
         } catch (e) {
-            console.error('❌ Error:', e);
+            console.error('Error:', e);
+        }
+    }
+    
+    async function loadConfigPractitioners() {
+        try {
+            const { data: practs } = await db.from('practitioners').select('*').order('first_name');
+            
+            let html = '<table style="width: 100%;"><thead><tr style="background: #F5F5FA;"><th style="padding: 12px; text-align: left;">Nombre</th><th style="padding: 12px; text-align: left;">Usuario</th><th style="padding: 12px; text-align: left;">Estado</th><th style="padding: 12px; text-align: left;">Acciones</th></tr></thead><tbody>';
+            
+            if (practs?.length) {
+                practs.forEach(p => {
+                    const estado = p.is_active ? 'Activo' : 'Inactivo';
+                    const badgeColor = p.is_active ? '#D1FAE5' : '#FEE2E2';
+                    const textColor = p.is_active ? '#065F46' : '#991B1B';
+                    const btnColor = p.is_active ? '#059669' : '#999999';
+                    const btnText = p.is_active ? 'Desactivar' : 'Activar';
+                    
+                    html += `<tr style="border-bottom: 1px solid #E5E5E5;"><td style="padding: 14px;"><strong>${p.first_name} ${p.last_name}</strong></td><td style="padding: 14px;">${p.username}</td><td style="padding: 14px;"><span style="background: ${badgeColor}; color: ${textColor}; padding: 4px 10px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">${estado}</span></td><td style="padding: 14px;"><button class="btn" style="background: ${btnColor}; padding: 6px 10px; font-size: 0.8em; margin-right: 4px;" onclick="togglePractState('${p.id}', ${!p.is_active})"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>${btnText}</button><button class="btn" style="background: #404469; padding: 6px 10px; font-size: 0.8em;" onclick="showPractChangePasswordModal('${p.id}', '${p.username}', '${p.first_name} ${p.last_name}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Contraseña</button></td></tr>`;
+                });
+            } else {
+                html += '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #999;">Sin participantes</td></tr>';
+            }
+            
+            html += '</tbody></table>';
+            document.getElementById('configPractTable').innerHTML = html;
+        } catch (e) {
+            console.error('Error:', e);
         }
     }
     
     function showAdminChangePasswordModal() {
         const modal = document.createElement('div');
-        modal.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);
-            display: flex; align-items: center; justify-content: center; z-index: 9999;
-        `;
-        
-        const pwd = Math.random().toString(36).slice(-8);
+        modal.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;`;
         
         modal.innerHTML = `
             <div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 450px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
@@ -932,13 +643,13 @@
                 </div>
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Nueva Contraseña:</label>
-                    <div style="display: flex; gap: 8px;">
-                        <input type="text" id="newAdminPwd" value="${pwd}" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: monospace;" readonly>
-                        <button onclick="navigator.clipboard.writeText('${pwd}'); alert('✅ Copiado!')" style="padding: 10px 15px; background: #E94D9A; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">📋 Copiar</button>
-                    </div>
+                    <input type="password" id="adminNewPwd" placeholder="Ingresa la contraseña" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
                 </div>
                 <div style="margin-bottom: 20px;">
-                    <button onclick="document.getElementById('newAdminPwd').value = Math.random().toString(36).slice(-8); alert('Nueva contraseña generada')" style="width: 100%; padding: 10px; background: #404469; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">🔄 Generar Otra</button>
+                    <label style="display: flex; align-items: center; cursor: pointer;">
+                        <input type="checkbox" onchange="document.getElementById('adminNewPwd').type = this.checked ? 'text' : 'password'" style="margin-right: 8px;">
+                        <span style="color: #666;">Mostrar contraseña</span>
+                    </label>
                 </div>
                 <div style="display: flex; gap: 10px; justify-content: flex-end;">
                     <button onclick="this.parentElement.parentElement.parentElement.remove()" style="padding: 10px 20px; background: #ddd; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancelar</button>
@@ -948,11 +659,18 @@
         `;
         
         document.body.appendChild(modal);
+        
         document.getElementById('btnGuardarAdminPwd').onclick = async function() {
-            const newPassword = document.getElementById('newAdminPwd').value;
+            const newPassword = document.getElementById('adminNewPwd').value.trim();
+            if (!newPassword) {
+                alert('Ingresa una contraseña');
+                return;
+            }
             modal.remove();
             await doChangeAdminPassword(newPassword);
         };
+        
+        document.getElementById('adminNewPwd').focus();
     }
     
     async function doChangeAdminPassword(newPassword) {
@@ -971,6 +689,37 @@
             localStorage.user = JSON.stringify(currentUser);
         } catch (e) {
             alert('Error: ' + e.message);
+        }
+    }
+    
+    async function loadEvals() {
+        try {
+            const { data: blocks } = await db.from('blocks').select('*').eq('is_published', true).order('module_id');
+            const div = document.getElementById('evalContainer');
+            div.innerHTML = '';
+            
+            if (blocks?.length) {
+                blocks.forEach(b => {
+                    div.innerHTML += `<div class="blockItem"><div class="blockInfo"><strong>${b.name}</strong><p>Puntos: ${b.total_points}</p></div></div>`;
+                });
+            } else {
+                div.innerHTML = '<div class="empty">No hay evaluaciones disponibles</div>';
+            }
+        } catch (e) {
+            console.error('Error:', e);
+        }
+    }
+    
+    function goSection(id) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        document.querySelectorAll('.sidebarItem').forEach(i => i.classList.remove('active'));
+        event.target.classList.add('active');
+        const titles = { dash: 'Dashboard', pract: 'Participantes', mods: 'Módulos', eval: 'Mis Evaluaciones', prof: 'Mi Perfil', config: 'Configuración' };
+        document.getElementById('pageTitle').textContent = titles[id] || 'Portal';
+        
+        if (id === 'config') {
+            loadConfig();
         }
     }
     
