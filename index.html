@@ -793,18 +793,49 @@
     
     async function doAssignModules(practId, blockIds) {
         try {
-            const { data: pract } = await db.from('practitioners').select('first_name, last_name').eq('id', practId).single();
+            console.log('📝 Asignando módulos...');
+            console.log('Practicante ID:', practId);
+            console.log('Bloques:', blockIds);
+            
+            const { data: pract, error: practError } = await db.from('practitioners').select('first_name, last_name').eq('id', practId).single();
+            
+            if (practError || !pract) {
+                alert('Error: No se encontró el participante');
+                console.error('Pract error:', practError);
+                return;
+            }
+            
+            console.log('✅ Participante encontrado:', pract.first_name, pract.last_name);
             
             for (const blockId of blockIds) {
-                await db.from('participant_assignments').upsert({
+                console.log(`\n📌 Insertando bloque ${blockId}...`);
+                
+                // Primero borra si existe para evitar conflictos
+                await db.from('participant_assignments')
+                    .delete()
+                    .eq('participant_id', practId)
+                    .eq('block_id', parseInt(blockId));
+                
+                // Luego inserta
+                const { data, error } = await db.from('participant_assignments').insert({
                     participant_id: practId,
                     block_id: parseInt(blockId),
                     status: 'pending'
-                });
+                }).select();
+                
+                if (error) {
+                    console.error(`❌ Error en bloque ${blockId}:`, error);
+                    alert(`Error asignando bloque ${blockId}: ${error.message}`);
+                    return;
+                }
+                
+                console.log(`✅ Bloque ${blockId} asignado:`, data);
             }
             
-            alert(`✅ Módulos Asignados a ${pract.first_name} ${pract.last_name}`);
+            console.log('\n✅ ¡Todas las asignaciones completadas!');
+            alert(`✅ Módulos Asignados a ${pract.first_name} ${pract.last_name}\n\nAbre la consola (F12) si hay errores`);
         } catch (e) {
+            console.error('❌ Error capturado:', e);
             alert('Error: ' + e.message);
         }
     }
