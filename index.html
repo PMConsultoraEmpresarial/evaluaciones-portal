@@ -416,18 +416,34 @@
     }
     
     async function createPractitioner() {
-        const name = prompt('Nombre:');
-        if (!name) return;
-        const lname = prompt('Apellido:');
-        if (!lname) return;
-        const uname = prompt('Usuario:');
-        if (!uname) return;
-        
-        const pwd = Math.random().toString(36).slice(-8);
-        console.log('👤 Creando participante:', name, lname, uname);
+        console.log('🔴 createPractitioner INICIADO');
         
         try {
-            console.log('1️⃣ Insertando en users...');
+            const name = prompt('Nombre:');
+            console.log('1️⃣ Nombre:', name);
+            if (!name) {
+                console.log('❌ Nombre vacío');
+                return;
+            }
+            
+            const lname = prompt('Apellido:');
+            console.log('2️⃣ Apellido:', lname);
+            if (!lname) {
+                console.log('❌ Apellido vacío');
+                return;
+            }
+            
+            const uname = prompt('Usuario:');
+            console.log('3️⃣ Usuario:', uname);
+            if (!uname) {
+                console.log('❌ Usuario vacío');
+                return;
+            }
+            
+            const pwd = Math.random().toString(36).slice(-8);
+            console.log('🔐 Contraseña generada:', pwd);
+            
+            console.log('📡 Insertando en users table...');
             const userResp = await db.from('users').insert({
                 email: `${uname}@impulsa.local`,
                 password_hash: pwd,
@@ -438,21 +454,22 @@
             
             console.log('📦 User response:', userResp);
             const { data: newUser, error: errUser } = userResp;
-            console.log('📊 newUser:', newUser);
             
             if (errUser) {
-                console.error('❌ Error en users:', errUser);
-                alert('Error: ' + errUser.message);
+                console.error('❌ Error users:', errUser);
+                alert('Error creando usuario: ' + errUser.message);
                 return;
             }
             
             if (!newUser || newUser.length === 0) {
-                console.error('❌ newUser vacío');
+                console.error('❌ No se retornó usuario');
                 alert('Error: No se creó el usuario');
                 return;
             }
             
-            console.log('2️⃣ Insertando en practitioners...');
+            console.log('✅ Usuario creado:', newUser[0].id);
+            
+            console.log('📡 Insertando en practitioners table...');
             const practResp = await db.from('practitioners').insert({
                 user_id: newUser[0].id,
                 first_name: name,
@@ -462,21 +479,25 @@
                 is_active: true
             });
             
-            console.log('📦 Pract response:', practResp);
+            console.log('📦 Practitioner response:', practResp);
             const { error: errPract } = practResp;
             
             if (errPract) {
-                console.error('❌ Error en practitioners:', errPract);
-                alert('Error: ' + errPract.message);
+                console.error('❌ Error practitioners:', errPract);
+                alert('Error creando participante: ' + errPract.message);
                 return;
             }
             
-            console.log('✅ Participante creado exitosamente');
+            console.log('✅✅ PARTICIPANTE CREADO EXITOSAMENTE');
             alert(`✅ Participante Creado\n\nUsuario: ${uname}\nContraseña: ${pwd}`);
+            
+            console.log('🔄 Recargando tablas...');
             await loadPractTable();
             await loadDash();
+            console.log('✅ Tablas recargadas');
+            
         } catch (e) {
-            console.error('❌ Exception:', e);
+            console.error('❌ EXCEPCIÓN:', e);
             alert('Error: ' + e.message);
         }
     }
