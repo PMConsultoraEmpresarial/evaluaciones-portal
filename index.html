@@ -120,7 +120,7 @@
         <div id="participantes" style="display: none;">
             <div class="card">
                 <h3>Gestión de Participantes</h3>
-                <button class="btn btn-small" onclick="abrirAgregarPract()" style="width: auto; margin-bottom: 20px;">+ Agregar</button>
+                <button class="btn btn-small" onclick="crearParticipante()" style="width: auto; margin-bottom: 20px;">+ Agregar</button>
                 <table id="tablaPract">
                     <thead>
                         <tr><th>Nombre</th><th>Usuario</th><th>Estado</th><th>Acciones</th></tr>
@@ -263,6 +263,7 @@
         } else {
             document.getElementById('adminMenu').style.display = 'none';
             document.getElementById('practMenu').style.display = 'block';
+            await cargarMisEvaluaciones();
             irSeccion('misevaluaciones');
         }
     }
@@ -310,23 +311,63 @@
         }
     }
 
-    // CARGAR MODULOS
+    // CARGAR MODULOS CON BLOQUES
     async function cargarModulos() {
         try {
-            const { data } = await db.from('modules').select('*').order('order_number');
+            const { data: mods } = await db.from('modules').select('*').order('order_number');
+            const { data: blocks } = await db.from('blocks').select('*').order('order_number');
+            
             const div = document.getElementById('listaModulos');
             div.innerHTML = '';
 
-            if (data) {
-                data.forEach(m => {
-                    div.innerHTML += `<div style="margin-bottom: 15px; padding: 15px; background: #f9f9f9; border-radius: 5px;">
-                        <strong>${m.name}</strong><br>
-                        <small>Puntos: ${m.total_points}</small>
-                    </div>`;
+            if (mods) {
+                mods.forEach(m => {
+                    const bloquesDelMod = blocks.filter(b => b.module_id === m.id) || [];
+                    
+                    let html = `<div style="margin-bottom: 20px; padding: 15px; background: #f9f9f9; border-radius: 5px; border-left: 4px solid #667eea;">
+                        <h4>${m.name}</h4>
+                        <p style="font-size: 0.9em; color: #666; margin: 5px 0;">Puntos: ${m.total_points}</p>
+                        <div style="margin-top: 10px;">`;
+                    
+                    bloquesDelMod.forEach(b => {
+                        const estado = b.is_published ? '✅ PUBLICADO' : '🔒 PRIVADO';
+                        const btnTexto = b.is_published ? 'Despublicar' : 'Publicar';
+                        html += `<div style="margin: 10px 0; padding: 10px; background: white; border-radius: 3px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>${b.name}</strong><br>
+                                <small style="color: ${b.is_published ? '#27ae60' : '#e74c3c'};">${estado}</small>
+                            </div>
+                            <button class="btn-small" onclick="togglePublicar(${b.id}, ${!b.is_published})" style="width: auto; padding: 6px 12px;">${btnTexto}</button>
+                        </div>`;
+                    });
+                    
+                    html += `</div></div>`;
+                    div.innerHTML += html;
                 });
             }
         } catch (e) {
             console.error('Error cargando módulos:', e);
+        }
+    }
+
+    // PUBLICAR/DESPUBLICAR BLOQUE
+    async function togglePublicar(blockId, publicar) {
+        try {
+            const { error } = await db
+                .from('blocks')
+                .update({ is_published: publicar, published_at: publicar ? new Date().toISOString() : null })
+                .eq('id', blockId);
+
+            if (error) {
+                alert('Error: ' + error.message);
+                return;
+            }
+
+            alert(publicar ? '✅ Bloque publicado' : '🔒 Bloque despublicado');
+            await cargarModulos();
+            await cargarDashboardAdmin();
+        } catch (e) {
+            alert('Error: ' + e.message);
         }
     }
 
@@ -351,9 +392,101 @@
         document.getElementById('titulo').textContent = titulos[seccion] || 'Portal';
     }
 
-    // PLACEHOLDER FUNCIONES
-    function abrirAgregarPract() {
-        alert('Agregar participante (en desarrollo)');
+    // CREAR PARTICIPANTE
+    async function crearParticipante() {
+        const nombre = prompt('Nombre:');
+        if (!nombre) return;
+        
+        const apellido = prompt('Apellido:');
+        if (!apellido) return;
+        
+        const usuario = prompt('Usuario (ej: nombre.apellido):');
+        if (!usuario) return;
+
+        try {
+            // Generar contraseña random
+            const pwd = Math.random().toString(36).slice(-8).toUpperCase();
+
+            // Crear user en tabla users
+            const { data: newUser, error: errUser } = await db
+                .from('users')
+                .insert({
+                    email: `${usuario}@impulsa.local`,
+                    password_hash: pwd,
+                    full_name: `${nombre} ${apellido}`,
+                    role: 'practicante',
+                    is_active: true
+                })
+                .select()
+                .single();
+
+            if (errUser) {
+                alert('Error crear usuario: ' + errUser.message);
+                return;
+            }
+
+            // Crear practitioner
+            const { error: errPract } = await db
+                .from('practitioners')
+                .insert({
+                    user_id: newUser.id,
+                    first_name: nombre,
+                    last_name: apellido,
+                    username: usuario,
+                    email: `${usuario}@impulsa.local`,
+                    is_active: true
+                });
+
+            if (errPract) {
+                alert('Error crear participante: ' + errPract.message);
+                return;
+            }
+
+            alert(`✅ Participante creado\n\nUsuario: ${usuario}\nContraseña: ${pwd}`);
+            await cargarParticipantes();
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    }
+
+    // CARGAR MIS EVALUACIONES (para participante)
+    async function cargarMisEvaluaciones() {
+        try {
+            const { data: blocks } = await db
+                .from('blocks')
+                .select('*, module:modules(name)')
+                .eq('is_published', true)
+                .order('module_id');
+
+            const div = document.getElementById('misevaluaciones');
+            if (!div) return;
+
+            let html = '<div class="card"><h3>Evaluaciones Disponibles</h3>';
+
+            if (blocks && blocks.length > 0) {
+                blocks.forEach(b => {
+                    html += `<div style="margin: 15px 0; padding: 15px; background: #f9f9f9; border-left: 4px solid #667eea; border-radius: 3px;">
+                        <h4 style="margin: 0;">${b.name}</h4>
+                        <p style="margin: 5px 0; color: #666; font-size: 0.9em;">
+                            <strong>Módulo:</strong> ${b.module?.name || 'N/A'}<br>
+                            <strong>Puntos:</strong> ${b.total_points}
+                        </p>
+                        <button class="btn-small" onclick="verDetalles(${b.id})" style="width: auto; margin-top: 10px;">Ver Evaluaciones</button>
+                    </div>`;
+                });
+            } else {
+                html += '<p style="color: #999; text-align: center; padding: 30px;">No hay evaluaciones publicadas aún.</p>';
+            }
+
+            html += '</div>';
+            div.innerHTML = html;
+        } catch (e) {
+            console.error('Error cargando evaluaciones:', e);
+        }
+    }
+
+    function verDetalles(blockId) {
+        alert('Ver evaluaciones del bloque ' + blockId + ' (en desarrollo)');
     }
 
     function editarPract(id) {
