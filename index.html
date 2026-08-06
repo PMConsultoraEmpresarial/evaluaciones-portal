@@ -140,14 +140,17 @@
         
         .backBtn {
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: 15px;
+            left: 15px;
             background: none;
             border: none;
-            font-size: 1.5em;
+            font-size: 1.1em;
             cursor: pointer;
             color: #777777;
+            padding: 5px;
         }
+        
+        .backBtn:hover { color: #404469; }
         
         .loginContainer h2 {
             font-family: 'Poppins', sans-serif;
@@ -493,7 +496,7 @@
                     <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
                 </svg>
             </div>
-            <h3>Participante</h3>
+            <h3>Practicante</h3>
             <p>Accede a tus evaluaciones y avances</p>
             <div class="arrow">→</div>
         </div>
@@ -509,15 +512,15 @@
         
         <div class="formGroup">
             <label>Email</label>
-            <input type="text" id="email" placeholder="tu@email.com" onkeypress="if(event.key==='Enter') doLogin()">
+            <input type="text" id="email" placeholder="tu@email.com">
         </div>
         
         <div class="formGroup">
             <label>Contraseña</label>
-            <input type="password" id="password" placeholder="Tu contraseña" onkeypress="if(event.key==='Enter') doLogin()">
+            <input type="password" id="password" placeholder="Tu contraseña">
         </div>
         
-        <button class="btnLogin" onclick="doLogin()">Ingresar</button>
+        <button class="btnLogin" id="btnLogin">Ingresar</button>
     </div>
 </div>
 
@@ -631,19 +634,21 @@
     let currentUser = null;
     let selectedRole = null;
     
-    window.db = null;
-    
     function initDB() {
-        db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        window.db = db;
-        console.log('✅ BD conectada');
+        try {
+            db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            console.log('✅ Supabase inicializado correctamente');
+        } catch (e) {
+            console.error('❌ Error iniciando Supabase:', e);
+            showError('Error al conectar a la BD');
+        }
     }
     
     function selectRole(role) {
         selectedRole = role;
         document.getElementById('roleSelect').classList.add('hidden');
         document.getElementById('loginPage').classList.add('active');
-        const titles = { admin: 'Administrador', practicante: 'Participante' };
+        const titles = { admin: 'Administrador', practicante: 'Practicante' };
         document.getElementById('loginTitle').textContent = `Acceso - ${titles[role]}`;
     }
     
@@ -651,44 +656,73 @@
         document.getElementById('roleSelect').classList.remove('hidden');
         document.getElementById('loginPage').classList.remove('active');
         selectedRole = null;
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
     }
     
-    async function doLogin() {
+    function doLogin() {
         const email = document.getElementById('email').value.trim();
         const pass = document.getElementById('password').value;
+        
+        console.log('🔐 Iniciando login con:', email);
         
         if (!email || !pass) {
             showError('Completa email y contraseña');
             return;
         }
         
-        try {
-            const { data: users, error } = await db.from('users').select('*').eq('email', email);
-            
-            if (error) {
-                showError('Error: ' + error.message);
-                return;
-            }
-            
-            if (!users?.length || users[0].password_hash !== pass) {
-                showError('Credenciales incorrectas');
-                return;
-            }
-            
-            currentUser = users[0];
-            localStorage.user = JSON.stringify(currentUser);
-            console.log('✅ Login exitoso:', currentUser.full_name);
-            showApp();
-        } catch (e) {
-            showError('Error: ' + e.message);
+        if (!db) {
+            showError('BD no inicializada');
+            return;
         }
+        
+        db.from('users')
+            .select('*')
+            .eq('email', email)
+            .then(response => {
+                console.log('📦 Respuesta completa:', response);
+                
+                const { data, error } = response;
+                
+                if (error) {
+                    console.error('❌ Error BD:', error.message, error.details);
+                    showError('Error BD: ' + error.message);
+                    return;
+                }
+                
+                console.log('✅ Datos recibidos:', data);
+                
+                if (!data || data.length === 0) {
+                    console.log('❌ No hay usuarios con ese email');
+                    showError('Email no encontrado');
+                    return;
+                }
+                
+                const user = data[0];
+                console.log('✅ Usuario encontrado:', user.full_name);
+                
+                if (user.password_hash !== pass) {
+                    console.log('❌ Contraseña incorrecta');
+                    showError('Contraseña incorrecta');
+                    return;
+                }
+                
+                console.log('✅✅ Login exitoso');
+                currentUser = user;
+                localStorage.user = JSON.stringify(currentUser);
+                showApp();
+            })
+            .catch(err => {
+                console.error('❌ Error en catch:', err);
+                showError('Error: ' + err.message);
+            });
     }
     
     function showError(msg) {
         const el = document.getElementById('errorMsg');
         el.textContent = msg;
         el.classList.add('show');
-        setTimeout(() => el.classList.remove('show'), 4000);
+        setTimeout(() => el.classList.remove('show'), 5000);
     }
     
     function showApp() {
@@ -705,100 +739,137 @@
         }
     }
     
-    async function loadAdminDashboard() {
-        try {
-            const { data: pract } = await db.from('practitioners').select('*');
-            const { data: mods } = await db.from('modules').select('*');
-            const { data: blocks } = await db.from('blocks').select('*').eq('is_published', true);
-            
-            document.getElementById('countPract').textContent = pract?.length || 0;
-            document.getElementById('countMods').textContent = mods?.length || 0;
-            document.getElementById('countBlocks').textContent = blocks?.length || 0;
-            
-            loadPractTable();
-            loadModules();
-        } catch (e) {
-            console.error(e);
-        }
-    }
-    
-    async function loadPractTable() {
-        try {
-            const { data } = await db.from('practitioners').select('*').order('first_name');
-            const tb = document.getElementById('practTable');
-            tb.innerHTML = '';
-            
-            if (data?.length) {
-                data.forEach(p => {
-                    tb.innerHTML += `<tr>
-                        <td><strong>${p.first_name} ${p.last_name}</strong></td>
-                        <td>${p.username}</td>
-                        <td><span class="badge ${p.is_active ? 'badge-active' : 'badge-inactive'}">${p.is_active ? 'Activo' : 'Inactivo'}</span></td>
-                    </tr>`;
-                });
-            } else {
-                tb.innerHTML = '<tr><td colspan="3" class="empty">Sin participantes</td></tr>';
-            }
-        } catch (e) {
-            console.error(e);
-        }
-    }
-    
-    async function loadModules() {
-        try {
-            const { data: mods } = await db.from('modules').select('*').order('order_number');
-            const { data: blocks } = await db.from('blocks').select('*').order('order_number');
-            
-            const div = document.getElementById('modsContainer');
-            div.innerHTML = '';
-            
-            if (mods?.length) {
-                mods.forEach(m => {
-                    const myBlocks = blocks.filter(b => b.module_id === m.id) || [];
-                    let html = `<div style="margin-bottom: 30px;">
-                        <h4 style="font-size: 1.1em; font-weight: 600; margin-bottom: 15px; color: #333;">${m.name}</h4>
-                        <p style="font-size: 0.9em; color: #777; margin-bottom: 12px;">Puntos: <strong>${m.total_points}</strong></p>`;
-                    
-                    myBlocks.forEach(b => {
-                        const estado = b.is_published ? 'PUBLICADO' : 'PRIVADO';
-                        const btn = b.is_published ? 'Despublicar' : 'Publicar';
-                        html += `<div class="blockItem">
-                            <div class="blockInfo">
-                                <strong>${b.name}</strong>
-                                <p>Puntos: ${b.total_points}</p>
-                                <p class="blockState ${b.is_published ? 'pub' : 'priv'}">${estado}</p>
-                            </div>
-                            <button class="btn" onclick="toggleBlock(${b.id}, ${!b.is_published})">${btn}</button>
-                        </div>`;
+    function loadAdminDashboard() {
+        db.from('practitioners')
+            .select('*')
+            .then(({ data: pract, error: e1 }) => {
+                if (e1) {
+                    console.error('Error cargando practitioners:', e1.message);
+                    return;
+                }
+                
+                db.from('modules')
+                    .select('*')
+                    .then(({ data: mods, error: e2 }) => {
+                        if (e2) {
+                            console.error('Error cargando modules:', e2.message);
+                            return;
+                        }
+                        
+                        db.from('blocks')
+                            .select('*')
+                            .eq('is_published', true)
+                            .then(({ data: blocks, error: e3 }) => {
+                                if (e3) {
+                                    console.error('Error cargando blocks:', e3.message);
+                                    return;
+                                }
+                                
+                                document.getElementById('countPract').textContent = pract?.length || 0;
+                                document.getElementById('countMods').textContent = mods?.length || 0;
+                                document.getElementById('countBlocks').textContent = blocks?.length || 0;
+                                
+                                loadPractTable();
+                                loadModules();
+                            });
                     });
-                    
-                    html += `</div>`;
-                    div.innerHTML += html;
-                });
-            }
-        } catch (e) {
-            console.error(e);
-        }
+            });
     }
     
-    async function toggleBlock(id, pub) {
+    function loadPractTable() {
+        db.from('practitioners')
+            .select('*')
+            .order('first_name')
+            .then(({ data, error }) => {
+                if (error) {
+                    console.error('Error cargando tabla:', error.message);
+                    return;
+                }
+                
+                const tb = document.getElementById('practTable');
+                tb.innerHTML = '';
+                
+                if (data?.length) {
+                    data.forEach(p => {
+                        tb.innerHTML += `<tr>
+                            <td><strong>${p.first_name} ${p.last_name}</strong></td>
+                            <td>${p.username}</td>
+                            <td><span class="badge ${p.is_active ? 'badge-active' : 'badge-inactive'}">${p.is_active ? 'Activo' : 'Inactivo'}</span></td>
+                        </tr>`;
+                    });
+                } else {
+                    tb.innerHTML = '<tr><td colspan="3" class="empty">Sin participantes</td></tr>';
+                }
+            });
+    }
+    
+    function loadModules() {
+        db.from('modules')
+            .select('*')
+            .order('order_number')
+            .then(({ data: mods, error: e1 }) => {
+                if (e1) {
+                    console.error('Error cargando modules:', e1.message);
+                    return;
+                }
+                
+                db.from('blocks')
+                    .select('*')
+                    .order('order_number')
+                    .then(({ data: blocks, error: e2 }) => {
+                        if (e2) {
+                            console.error('Error cargando blocks:', e2.message);
+                            return;
+                        }
+                        
+                        const div = document.getElementById('modsContainer');
+                        div.innerHTML = '';
+                        
+                        if (mods?.length) {
+                            mods.forEach(m => {
+                                const myBlocks = blocks.filter(b => b.module_id === m.id) || [];
+                                let html = `<div style="margin-bottom: 30px;">
+                                    <h4 style="font-size: 1.1em; font-weight: 600; margin-bottom: 15px; color: #333;">${m.name}</h4>
+                                    <p style="font-size: 0.9em; color: #777; margin-bottom: 12px;">Puntos: <strong>${m.total_points}</strong></p>`;
+                                
+                                myBlocks.forEach(b => {
+                                    const estado = b.is_published ? 'PUBLICADO' : 'PRIVADO';
+                                    const btn = b.is_published ? 'Despublicar' : 'Publicar';
+                                    html += `<div class="blockItem">
+                                        <div class="blockInfo">
+                                            <strong>${b.name}</strong>
+                                            <p>Puntos: ${b.total_points}</p>
+                                            <p class="blockState ${b.is_published ? 'pub' : 'priv'}">${estado}</p>
+                                        </div>
+                                        <button class="btn" onclick="toggleBlock(${b.id}, ${!b.is_published})">${btn}</button>
+                                    </div>`;
+                                });
+                                
+                                html += `</div>`;
+                                div.innerHTML += html;
+                            });
+                        }
+                    });
+            });
+    }
+    
+    function toggleBlock(id, pub) {
         console.log('Toggling block', id, 'to', pub);
-        try {
-            const { error } = await db.from('blocks').update({
-                is_published: pub,
-                published_at: pub ? new Date().toISOString() : null
-            }).eq('id', id);
-            
-            if (error) throw error;
-            alert(pub ? 'Bloque publicado' : 'Bloque despublicado');
-            await loadModules();
-            await loadAdminDashboard();
-        } catch (e) {
-            alert('Error: ' + e.message);
-        }
+        db.from('blocks')
+            .update({ is_published: pub, published_at: pub ? new Date().toISOString() : null })
+            .eq('id', id)
+            .then(({ error }) => {
+                if (error) {
+                    alert('Error: ' + error.message);
+                    return;
+                }
+                alert(pub ? 'Bloque publicado' : 'Bloque despublicado');
+                loadModules();
+                loadAdminDashboard();
+            });
     }
     
-    async function createPractitioner() {
+    function createPractitioner() {
         console.log('Creating participant...');
         const name = prompt('Nombre:');
         if (!name) return;
@@ -807,64 +878,76 @@
         const uname = prompt('Usuario (ej: nombre.apellido):');
         if (!uname) return;
         
-        try {
-            const pwd = Math.random().toString(36).slice(-8);
-            console.log('Generating password:', pwd);
-            
-            const { data: newUser, error: errUser } = await db.from('users').insert({
+        const pwd = Math.random().toString(36).slice(-8);
+        console.log('Generated password:', pwd);
+        
+        db.from('users')
+            .insert({
                 email: `${uname}@impulsa.local`,
                 password_hash: pwd,
                 full_name: `${name} ${lname}`,
                 role: 'practicante',
                 is_active: true
-            }).select().single();
-            
-            if (errUser) throw errUser;
-            console.log('User created:', newUser.id);
-            
-            const { error: errPract } = await db.from('practitioners').insert({
-                user_id: newUser.id,
-                first_name: name,
-                last_name: lname,
-                username: uname,
-                email: `${uname}@impulsa.local`,
-                is_active: true
+            })
+            .select()
+            .single()
+            .then(({ data: newUser, error: errUser }) => {
+                if (errUser) {
+                    alert('Error creating user: ' + errUser.message);
+                    return;
+                }
+                console.log('✅ User created:', newUser.id);
+                
+                db.from('practitioners')
+                    .insert({
+                        user_id: newUser.id,
+                        first_name: name,
+                        last_name: lname,
+                        username: uname,
+                        email: `${uname}@impulsa.local`,
+                        is_active: true
+                    })
+                    .then(({ error: errPract }) => {
+                        if (errPract) {
+                            alert('Error creating practitioner: ' + errPract.message);
+                            return;
+                        }
+                        console.log('✅ Practitioner created');
+                        alert(`Participante Creado\n\nUsuario: ${uname}\nContraseña: ${pwd}`);
+                        loadPractTable();
+                        loadAdminDashboard();
+                    });
             });
-            
-            if (errPract) throw errPract;
-            console.log('Participant created');
-            
-            alert(`Participante Creado\n\nUsuario: ${uname}\nContraseña: ${pwd}`);
-            await loadPractTable();
-            await loadAdminDashboard();
-        } catch (e) {
-            console.error('Error:', e);
-            alert('Error: ' + e.message);
-        }
     }
     
-    async function loadEvaluations() {
-        try {
-            const { data: blocks } = await db.from('blocks').select('*').eq('is_published', true).order('module_id');
-            const div = document.getElementById('evalContainer');
-            div.innerHTML = '';
-            
-            if (blocks?.length) {
-                blocks.forEach(b => {
-                    div.innerHTML += `<div class="blockItem">
-                        <div class="blockInfo">
-                            <strong>${b.name}</strong>
-                            <p>Puntos: ${b.total_points}</p>
-                            <p class="blockState pub">Disponible</p>
-                        </div>
-                    </div>`;
-                });
-            } else {
-                div.innerHTML = '<div class="empty">No hay evaluaciones disponibles</div>';
-            }
-        } catch (e) {
-            console.error(e);
-        }
+    function loadEvaluations() {
+        db.from('blocks')
+            .select('*')
+            .eq('is_published', true)
+            .order('module_id')
+            .then(({ data: blocks, error }) => {
+                if (error) {
+                    console.error('Error cargando evaluaciones:', error.message);
+                    return;
+                }
+                
+                const div = document.getElementById('evalContainer');
+                div.innerHTML = '';
+                
+                if (blocks?.length) {
+                    blocks.forEach(b => {
+                        div.innerHTML += `<div class="blockItem">
+                            <div class="blockInfo">
+                                <strong>${b.name}</strong>
+                                <p>Puntos: ${b.total_points}</p>
+                                <p class="blockState pub">Disponible</p>
+                            </div>
+                        </div>`;
+                    });
+                } else {
+                    div.innerHTML = '<div class="empty">No hay evaluaciones disponibles</div>';
+                }
+            });
     }
     
     function goSection(id) {
@@ -885,8 +968,18 @@
         }
     }
     
-    window.addEventListener('load', () => {
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('🚀 Página cargada');
         initDB();
+        
+        document.getElementById('btnLogin').addEventListener('click', doLogin);
+        document.getElementById('password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') doLogin();
+        });
+        document.getElementById('email').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') doLogin();
+        });
+        
         if (localStorage.user) {
             currentUser = JSON.parse(localStorage.user);
             document.getElementById('roleSelect').classList.add('hidden');
