@@ -167,8 +167,25 @@
             <div id="pract" class="section">
                 <div class="card">
                     <h3>Participantes</h3>
-                    <button class="btn btn-add" onclick="createPractitioner()">+ Agregar Participante</button>
-                    <table><thead><tr><th>Nombre</th><th>Usuario</th><th>Estado</th></tr></thead><tbody id="practTable"></tbody></table>
+                    
+                    <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+                        <button class="btn btn-add" onclick="createPractitioner()">+ Agregar Participante</button>
+                        <input type="text" id="searchPract" placeholder="🔍 Buscar por nombre o usuario..." 
+                            style="flex: 1; padding: 10px 14px; border: 1.5px solid #E5E5E5; border-radius: 8px; font-family: 'Inter', sans-serif;"
+                            onkeyup="filterPractTable()">
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Usuario</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="practTable"></tbody>
+                    </table>
                 </div>
             </div>
             
@@ -345,21 +362,168 @@
         }
     }
     
+    let allPractitioners = [];
+    
     async function loadPractTable() {
         try {
             const { data } = await db.from('practitioners').select('*').order('first_name');
-            const tb = document.getElementById('practTable');
-            tb.innerHTML = '';
-            
-            if (data?.length) {
-                data.forEach(p => {
-                    tb.innerHTML += `<tr><td><strong>${p.first_name} ${p.last_name}</strong></td><td>${p.username}</td><td><span class="badge ${p.is_active ? 'badge-active' : 'badge-inactive'}">${p.is_active ? 'Activo' : 'Inactivo'}</span></td></tr>`;
-                });
-            } else {
-                tb.innerHTML = '<tr><td colspan="3" class="empty">Sin participantes</td></tr>';
-            }
+            allPractitioners = data || [];
+            renderPractTable(allPractitioners);
         } catch (e) {
             console.error('Error:', e);
+        }
+    }
+    
+    function renderPractTable(data) {
+        const tb = document.getElementById('practTable');
+        tb.innerHTML = '';
+        
+        if (data?.length) {
+            data.forEach(p => {
+                const estatoBtn = p.is_active ? '✅ Activo' : '⭕ Inactivo';
+                const btnColor = p.is_active ? '#059669' : '#999999';
+                
+                tb.innerHTML += `<tr>
+                    <td><strong>${p.first_name} ${p.last_name}</strong></td>
+                    <td>${p.username}</td>
+                    <td><span class="badge ${p.is_active ? 'badge-active' : 'badge-inactive'}">${p.is_active ? 'Activo' : 'Inactivo'}</span></td>
+                    <td>
+                        <button class="btn" style="background: ${btnColor}; padding: 6px 12px; font-size: 0.8em; margin-right: 5px;" onclick="togglePractState('${p.id}', ${!p.is_active})">${p.is_active ? '🔒 Desactivar' : '🔓 Activar'}</button>
+                        <button class="btn" style="background: #404469; padding: 6px 12px; font-size: 0.8em;" onclick="showChangePasswordModal('${p.id}', '${p.username}', '${p.first_name} ${p.last_name}')">🔑 Contraseña</button>
+                    </td>
+                </tr>`;
+            });
+        } else {
+            tb.innerHTML = '<tr><td colspan="4" class="empty">Sin participantes</td></tr>';
+        }
+    }
+    
+    function filterPractTable() {
+        const search = document.getElementById('searchPract').value.toLowerCase().trim();
+        
+        if (!search) {
+            renderPractTable(allPractitioners);
+            return;
+        }
+        
+        const filtered = allPractitioners.filter(p => 
+            p.first_name.toLowerCase().includes(search) ||
+            p.last_name.toLowerCase().includes(search) ||
+            p.username.toLowerCase().includes(search)
+        );
+        
+        renderPractTable(filtered);
+    }
+    
+    async function togglePractState(practId, newState) {
+        console.log('🔄 Toggleando estado:', practId, newState);
+        
+        try {
+            const { error } = await db.from('practitioners')
+                .update({ is_active: newState })
+                .eq('id', practId);
+            
+            if (error) {
+                alert('Error: ' + error.message);
+                return;
+            }
+            
+            alert(newState ? '✅ Participante activado' : '⭕ Participante desactivado');
+            await loadPractTable();
+            await loadDash();
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    }
+    
+    function showChangePasswordModal(practId, username, fullName) {
+        console.log('🔐 Modal contraseña:', username);
+        
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        `;
+        
+        const pwd = Math.random().toString(36).slice(-8);
+        
+        modal.innerHTML = `
+            <div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 450px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                <h3 style="margin-bottom: 20px; color: #333;">Cambiar Contraseña</h3>
+                
+                <div style="background: #F5F5FA; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <p style="margin: 5px 0; color: #666;"><strong>Participante:</strong> ${fullName}</p>
+                    <p style="margin: 5px 0; color: #666;"><strong>Usuario:</strong> ${username}</p>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Nueva Contraseña:</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="newPwd" value="${pwd}" style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: monospace;" readonly>
+                        <button onclick="navigator.clipboard.writeText('${pwd}'); alert('✅ Copiado!')" style="padding: 10px 15px; background: #E94D9A; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">📋 Copiar</button>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <button id="btnGenerar" onclick="this.previousElementSibling.querySelector('input').value = Math.random().toString(36).slice(-8); alert('Nueva contraseña generada')" style="width: 100%; padding: 10px; background: #404469; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin-bottom: 10px;">🔄 Generar Otra</button>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" style="padding: 10px 20px; background: #ddd; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancelar</button>
+                    <button id="btnGuardarPwd" style="padding: 10px 20px; background: #059669; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">✅ Guardar</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        document.getElementById('btnGuardarPwd').onclick = async function() {
+            const newPassword = document.getElementById('newPwd').value;
+            console.log('💾 Guardando contraseña:', newPassword);
+            modal.remove();
+            await doChangePassword(practId, newPassword, username);
+        };
+    }
+    
+    async function doChangePassword(practId, newPassword, username) {
+        try {
+            console.log('📡 Actualizando contraseña en users...');
+            
+            // Primero obtener el user_id del participante
+            const { data: pract } = await db.from('practitioners').select('user_id').eq('id', practId);
+            
+            if (!pract?.length) {
+                alert('Error: Participante no encontrado');
+                return;
+            }
+            
+            const userId = pract[0].user_id;
+            
+            // Actualizar password_hash en users
+            const { error } = await db.from('users')
+                .update({ password_hash: newPassword })
+                .eq('id', userId);
+            
+            if (error) {
+                alert('Error: ' + error.message);
+                return;
+            }
+            
+            console.log('✅ Contraseña actualizada');
+            alert(`✅ Contraseña Actualizada\n\nUsuario: ${username}\nNueva Contraseña: ${newPassword}\n\nGuarda este dato`);
+            
+            await loadPractTable();
+        } catch (e) {
+            console.error('Error:', e);
+            alert('Error: ' + e.message);
         }
     }
     
