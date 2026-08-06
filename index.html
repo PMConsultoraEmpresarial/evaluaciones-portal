@@ -8,494 +8,109 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background: #F9FAFC;
-            color: #333333;
-        }
-        
+        body { font-family: 'Inter', sans-serif; background: #F9FAFC; color: #333333; }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #F5F5FA; }
         ::-webkit-scrollbar-thumb { background: #D0D0D8; border-radius: 4px; }
         
-        /* ===== PANTALLA INICIAL ===== */
-        .roleSelect {
-            display: flex;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #404469 0%, #5a5a8a 100%);
-            padding: 40px 20px;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        
+        .roleSelect { display: flex; min-height: 100vh; background: linear-gradient(135deg, #404469 0%, #5a5a8a 100%); padding: 40px 20px; flex-direction: column; justify-content: center; align-items: center; }
         .roleSelect.hidden { display: none; }
-        
-        .roleSelect h1 {
-            color: white;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 700;
-        }
-        
-        .roleSelect p {
-            color: rgba(255,255,255,0.9);
-            font-size: 1.1em;
-            margin-bottom: 60px;
-            text-align: center;
-            max-width: 600px;
-        }
-        
-        .roleCards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            max-width: 900px;
-            width: 100%;
-        }
-        
-        .roleCard {
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-        
-        .roleCard:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 24px rgba(64, 68, 105, 0.15);
-        }
-        
-        .roleCard .icon {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 20px;
-        }
-        
-        .roleCard svg {
-            width: 100%;
-            height: 100%;
-            stroke: #404469;
-            stroke-width: 1.5;
-            fill: none;
-        }
-        
-        .roleCard h3 {
-            font-size: 1.3em;
-            margin-bottom: 10px;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            color: #333333;
-        }
-        
-        .roleCard p {
-            color: #777777;
-            font-size: 0.95em;
-            margin-bottom: 25px;
-        }
-        
-        .roleCard .arrow {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            background: #404469;
-            border-radius: 50%;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2em;
-            transition: all 0.3s ease;
-        }
-        
+        .roleSelect h1 { color: white; font-size: 2.5em; margin-bottom: 10px; font-family: 'Poppins', sans-serif; font-weight: 700; }
+        .roleSelect p { color: rgba(255,255,255,0.9); font-size: 1.1em; margin-bottom: 60px; text-align: center; max-width: 600px; }
+        .roleCards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; max-width: 900px; width: 100%; }
+        .roleCard { background: white; padding: 40px; border-radius: 16px; text-align: center; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .roleCard:hover { transform: translateY(-5px); box-shadow: 0 12px 24px rgba(64, 68, 105, 0.15); }
+        .roleCard .icon { width: 60px; height: 60px; margin: 0 auto 20px; }
+        .roleCard svg { width: 100%; height: 100%; stroke: #404469; stroke-width: 1.5; fill: none; }
+        .roleCard h3 { font-size: 1.3em; margin-bottom: 10px; font-family: 'Poppins', sans-serif; font-weight: 600; color: #333333; }
+        .roleCard p { color: #777777; font-size: 0.95em; margin-bottom: 25px; }
+        .roleCard .arrow { display: inline-flex; width: 40px; height: 40px; background: #404469; border-radius: 50%; color: white; align-items: center; justify-content: center; font-size: 1.2em; transition: all 0.3s ease; }
         .roleCard:hover .arrow { background: #E94D9A; }
         
-        /* ===== LOGIN ===== */
-        .loginPage {
-            display: none;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #404469 0%, #5a5a8a 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        
+        .loginPage { display: none; min-height: 100vh; background: linear-gradient(135deg, #404469 0%, #5a5a8a 100%); display: flex; align-items: center; justify-content: center; padding: 20px; }
         .loginPage.active { display: flex; }
-        
-        .loginContainer {
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            max-width: 420px;
-            width: 100%;
-            padding: 50px;
-            position: relative;
-        }
-        
-        .backBtn {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            background: none;
-            border: none;
-            font-size: 1.1em;
-            cursor: pointer;
-            color: #777777;
-            padding: 5px;
-        }
-        
+        .loginContainer { background: white; border-radius: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); max-width: 420px; width: 100%; padding: 50px; position: relative; }
+        .backBtn { position: absolute; top: 15px; left: 15px; background: none; border: none; font-size: 1.1em; cursor: pointer; color: #777777; padding: 5px; }
         .backBtn:hover { color: #404469; }
-        
-        .loginContainer h2 {
-            font-family: 'Poppins', sans-serif;
-            font-size: 1.8em;
-            margin-bottom: 30px;
-            color: #333333;
-            text-align: center;
-        }
-        
-        .formGroup {
-            margin-bottom: 20px;
-        }
-        
-        .formGroup label {
-            display: block;
-            font-size: 0.9em;
-            font-weight: 600;
-            color: #333333;
-            margin-bottom: 8px;
-        }
-        
-        .formGroup input {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1.5px solid #E5E5E5;
-            border-radius: 8px;
-            font-size: 1em;
-            font-family: 'Inter', sans-serif;
-            transition: all 0.3s ease;
-        }
-        
-        .formGroup input:focus {
-            outline: none;
-            border-color: #404469;
-            background: #F9FAFC;
-        }
-        
-        .error {
-            background: #FEE2E2;
-            color: #DC2626;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 0.9em;
-            display: none;
-        }
-        
+        .loginContainer h2 { font-family: 'Poppins', sans-serif; font-size: 1.8em; margin-bottom: 30px; color: #333333; text-align: center; }
+        .formGroup { margin-bottom: 20px; }
+        .formGroup label { display: block; font-size: 0.9em; font-weight: 600; color: #333333; margin-bottom: 8px; }
+        .formGroup input { width: 100%; padding: 12px 14px; border: 1.5px solid #E5E5E5; border-radius: 8px; font-size: 1em; font-family: 'Inter', sans-serif; transition: all 0.3s ease; }
+        .formGroup input:focus { outline: none; border-color: #404469; background: #F9FAFC; }
+        .error { background: #FEE2E2; color: #DC2626; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9em; display: none; }
         .error.show { display: block; }
-        
-        .btnLogin {
-            width: 100%;
-            padding: 12px;
-            background: #404469;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1em;
-            font-weight: 600;
-            font-family: 'Poppins', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-        }
-        
+        .btnLogin { width: 100%; padding: 12px; background: #404469; color: white; border: none; border-radius: 8px; font-size: 1em; font-weight: 600; font-family: 'Poppins', sans-serif; cursor: pointer; transition: all 0.3s ease; margin-top: 10px; }
         .btnLogin:hover { background: #E94D9A; }
         
-        /* ===== APP PRINCIPAL ===== */
-        .app {
-            display: none;
-            height: 100vh;
-            flex-direction: row;
-        }
-        
+        .app { display: none; height: 100vh; flex-direction: row; }
         .app.active { display: flex; }
-        
-        .sidebar {
-            width: 250px;
-            background: #404469;
-            color: white;
-            padding: 25px;
-            overflow-y: auto;
-            border-right: 1px solid rgba(0,0,0,0.1);
-        }
-        
-        .sidebarLogo {
-            font-size: 1.3em;
-            font-weight: 700;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .sidebarSection {
-            margin-bottom: 25px;
-            display: none;
-        }
-        
+        .sidebar { width: 250px; background: #404469; color: white; padding: 25px; overflow-y: auto; border-right: 1px solid rgba(0,0,0,0.1); }
+        .sidebarLogo { font-size: 1.3em; font-weight: 700; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebarSection { margin-bottom: 25px; display: none; }
         .sidebarSection.active { display: block; }
-        
-        .sidebarTitle {
-            font-size: 0.75em;
-            text-transform: uppercase;
-            color: rgba(255,255,255,0.6);
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-        
-        .sidebarItem {
-            padding: 12px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.95em;
-            margin-bottom: 6px;
-        }
-        
+        .sidebarTitle { font-size: 0.75em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 10px; font-weight: 600; }
+        .sidebarItem { padding: 12px 14px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; font-size: 0.95em; margin-bottom: 6px; }
         .sidebarItem:hover { background: rgba(255,255,255,0.1); }
-        
         .sidebarItem.active { background: #E94D9A; font-weight: 600; }
-        
-        .sidebarLogout {
-            margin-top: auto;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .btnLogout {
-            width: 100%;
-            padding: 10px;
-            background: #E94D9A;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
+        .sidebarLogout { margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .btnLogout { width: 100%; padding: 10px; background: #E94D9A; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
         .btnLogout:hover { background: #D63A7F; }
         
-        /* ===== MAIN CONTENT ===== */
-        .mainContent {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-        }
+        .mainContent { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+        .header { background: white; padding: 25px 35px; border-bottom: 1px solid #E5E5E5; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 1.8em; font-family: 'Poppins', sans-serif; font-weight: 700; color: #333333; }
+        .userInfo { text-align: right; }
+        .userInfo p { font-size: 0.9em; color: #777777; }
+        .userInfo strong { display: block; font-size: 1.05em; color: #333333; margin-top: 2px; }
         
-        .header {
-            background: white;
-            padding: 25px 35px;
-            border-bottom: 1px solid #E5E5E5;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .header h1 {
-            font-size: 1.8em;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 700;
-            color: #333333;
-        }
-        
-        .userInfo {
-            text-align: right;
-        }
-        
-        .userInfo p {
-            font-size: 0.9em;
-            color: #777777;
-        }
-        
-        .userInfo strong {
-            display: block;
-            font-size: 1.05em;
-            color: #333333;
-            margin-top: 2px;
-        }
-        
-        .content {
-            flex: 1;
-            padding: 35px;
-            overflow-y: auto;
-        }
-        
-        .section {
-            display: none;
-        }
-        
+        .content { flex: 1; padding: 35px; overflow-y: auto; }
+        .section { display: none; }
         .section.active { display: block; }
         
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
+        .card { background: white; border-radius: 12px; padding: 30px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .card h3 { font-size: 1.3em; font-family: 'Poppins', sans-serif; font-weight: 600; margin-bottom: 25px; color: #333333; }
         
-        .card h3 {
-            font-size: 1.3em;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            margin-bottom: 25px;
-            color: #333333;
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 15px;
-        }
-        
-        .stat {
-            background: #F5F5FA;
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 4px solid #E94D9A;
-        }
-        
-        .stat strong {
-            display: block;
-            color: #404469;
-            font-size: 1.8em;
-            margin-bottom: 5px;
-        }
-        
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 15px; }
+        .stat { background: #F5F5FA; padding: 20px; border-radius: 10px; border-left: 4px solid #E94D9A; }
+        .stat strong { display: block; color: #404469; font-size: 1.8em; margin-bottom: 5px; }
         .stat p { color: #777777; font-size: 0.9em; }
         
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #F5F5FA; padding: 12px; text-align: left; font-weight: 600; font-size: 0.9em; color: #333333; border-bottom: 2px solid #E5E5E5; }
+        td { padding: 14px 12px; border-bottom: 1px solid #E5E5E5; }
         
-        th {
-            background: #F5F5FA;
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 0.9em;
-            color: #333333;
-            border-bottom: 2px solid #E5E5E5;
-        }
-        
-        td {
-            padding: 14px 12px;
-            border-bottom: 1px solid #E5E5E5;
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: 600;
-        }
-        
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.8em; font-weight: 600; }
         .badge-active { background: #D1FAE5; color: #065F46; }
         .badge-inactive { background: #FEE2E2; color: #991B1B; }
         
-        .btn {
-            display: inline-block;
-            padding: 10px 16px;
-            background: #404469;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            font-size: 0.9em;
-            margin: 5px 5px 5px 0;
-        }
-        
+        .btn { display: inline-block; padding: 10px 16px; background: #404469; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; font-size: 0.9em; margin: 5px 5px 5px 0; }
         .btn:hover { background: #E94D9A; }
+        .btn-add { margin-bottom: 20px; }
         
-        .btn-add {
-            margin-bottom: 20px;
-        }
-        
-        .blockItem {
-            background: #F5F5FA;
-            padding: 16px;
-            border-radius: 10px;
-            margin-bottom: 12px;
-            border-left: 4px solid #404469;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .blockInfo strong {
-            display: block;
-            color: #333333;
-            margin-bottom: 4px;
-        }
-        
-        .blockInfo p {
-            font-size: 0.9em;
-            color: #777777;
-        }
-        
-        .blockState {
-            font-size: 0.85em;
-            margin-top: 4px;
-        }
-        
+        .blockItem { background: #F5F5FA; padding: 16px; border-radius: 10px; margin-bottom: 12px; border-left: 4px solid #404469; display: flex; justify-content: space-between; align-items: center; }
+        .blockInfo strong { display: block; color: #333333; margin-bottom: 4px; }
+        .blockInfo p { font-size: 0.9em; color: #777777; }
+        .blockState { font-size: 0.85em; margin-top: 4px; }
         .blockState.pub { color: #059669; }
         .blockState.priv { color: #DC2626; }
         
-        .empty {
-            text-align: center;
-            padding: 40px;
-            color: #999999;
-        }
+        .empty { text-align: center; padding: 40px; color: #999999; }
     </style>
 </head>
 <body>
 
-<!-- SELECCIONAR ROL -->
 <div id="roleSelect" class="roleSelect">
     <h1>IMPULSA RH</h1>
     <p>Portal de Evaluaciones - Selecciona tu tipo de acceso</p>
-    
     <div class="roleCards">
         <div class="roleCard" onclick="selectRole('admin')">
-            <div class="icon">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
-                </svg>
-            </div>
+            <div class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></div>
             <h3>Administrador</h3>
             <p>Gestiona participantes y publica contenido</p>
             <div class="arrow">→</div>
         </div>
-        
         <div class="roleCard" onclick="selectRole('practicante')">
-            <div class="icon">
-                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
-                </svg>
-            </div>
+            <div class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg></div>
             <h3>Practicante</h3>
             <p>Accede a tus evaluaciones y avances</p>
             <div class="arrow">→</div>
@@ -503,102 +118,60 @@
     </div>
 </div>
 
-<!-- LOGIN -->
 <div id="loginPage" class="loginPage">
     <div class="loginContainer">
         <button class="backBtn" onclick="backToRole()">← Atrás</button>
         <h2 id="loginTitle">Acceso</h2>
         <div class="error" id="errorMsg"></div>
-        
-        <div class="formGroup">
-            <label>Email</label>
-            <input type="text" id="email" placeholder="tu@email.com">
-        </div>
-        
-        <div class="formGroup">
-            <label>Contraseña</label>
-            <input type="password" id="password" placeholder="Tu contraseña">
-        </div>
-        
-        <button class="btnLogin" id="btnLogin">Ingresar</button>
+        <div class="formGroup"><label>Email</label><input type="text" id="email" placeholder="tu@email.com"></div>
+        <div class="formGroup"><label>Contraseña</label><input type="password" id="password" placeholder="Tu contraseña"></div>
+        <button class="btnLogin" onclick="doLogin()">Ingresar</button>
     </div>
 </div>
 
-<!-- APP PRINCIPAL -->
 <div id="app" class="app">
-    <!-- SIDEBAR -->
     <div class="sidebar">
         <div class="sidebarLogo">IMPULSA RH</div>
-        
         <div id="adminMenu" class="sidebarSection">
             <div class="sidebarTitle">Menú Admin</div>
             <div class="sidebarItem active" onclick="goSection('dash')">Dashboard</div>
             <div class="sidebarItem" onclick="goSection('pract')">Participantes</div>
             <div class="sidebarItem" onclick="goSection('mods')">Módulos</div>
         </div>
-        
         <div id="practMenu" class="sidebarSection">
             <div class="sidebarTitle">Menú</div>
             <div class="sidebarItem active" onclick="goSection('eval')">Evaluaciones</div>
             <div class="sidebarItem" onclick="goSection('prof')">Mi Perfil</div>
         </div>
-        
-        <div class="sidebarLogout">
-            <button class="btnLogout" onclick="doLogout()">Salir</button>
-        </div>
+        <div class="sidebarLogout"><button class="btnLogout" onclick="doLogout()">Salir</button></div>
     </div>
     
-    <!-- MAIN CONTENT -->
     <div class="mainContent">
         <div class="header">
             <h1 id="pageTitle">Dashboard</h1>
-            <div class="userInfo">
-                <p>Bienvenido</p>
-                <strong id="userName">Usuario</strong>
-            </div>
+            <div class="userInfo"><p>Bienvenido</p><strong id="userName">Usuario</strong></div>
         </div>
         
         <div class="content">
-            <!-- DASHBOARD -->
             <div id="dash" class="section active">
                 <div class="card">
                     <h3>Dashboard</h3>
                     <div class="stats">
-                        <div class="stat">
-                            <strong id="countPract">0</strong>
-                            <p>Participantes Activos</p>
-                        </div>
-                        <div class="stat">
-                            <strong id="countMods">0</strong>
-                            <p>Módulos</p>
-                        </div>
-                        <div class="stat">
-                            <strong id="countBlocks">0</strong>
-                            <p>Bloques Publicados</p>
-                        </div>
+                        <div class="stat"><strong id="countPract">0</strong><p>Participantes</p></div>
+                        <div class="stat"><strong id="countMods">0</strong><p>Módulos</p></div>
+                        <div class="stat"><strong id="countBlocks">0</strong><p>Bloques Publicados</p></div>
                     </div>
                 </div>
             </div>
             
-            <!-- PARTICIPANTES -->
             <div id="pract" class="section">
                 <div class="card">
                     <h3>Participantes</h3>
-                    <button class="btn btn-add" id="btnAgregar" onclick="createPractitioner()">+ Agregar Participante</button>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Usuario</th>
-                                <th>Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="practTable"></tbody>
-                    </table>
+                    <button class="btn btn-add" onclick="createPractitioner()">+ Agregar Participante</button>
+                    <table><thead><tr><th>Nombre</th><th>Usuario</th><th>Estado</th></tr></thead><tbody id="practTable"></tbody></table>
                 </div>
             </div>
             
-            <!-- MODULOS -->
             <div id="mods" class="section">
                 <div class="card">
                     <h3>Módulos y Bloques</h3>
@@ -606,7 +179,6 @@
                 </div>
             </div>
             
-            <!-- EVALUACIONES -->
             <div id="eval" class="section">
                 <div class="card">
                     <h3>Mis Evaluaciones</h3>
@@ -614,7 +186,6 @@
                 </div>
             </div>
             
-            <!-- PERFIL -->
             <div id="prof" class="section">
                 <div class="card">
                     <h3>Mi Perfil</h3>
@@ -632,20 +203,13 @@
     
     let db = null;
     let currentUser = null;
-    let selectedRole = null;
     
     function initDB() {
-        try {
-            db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            console.log('✅ Supabase inicializado correctamente');
-        } catch (e) {
-            console.error('❌ Error iniciando Supabase:', e);
-            showError('Error al conectar a la BD');
-        }
+        db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        console.log('✅ Supabase OK');
     }
     
     function selectRole(role) {
-        selectedRole = role;
         document.getElementById('roleSelect').classList.add('hidden');
         document.getElementById('loginPage').classList.add('active');
         const titles = { admin: 'Administrador', practicante: 'Practicante' };
@@ -655,67 +219,8 @@
     function backToRole() {
         document.getElementById('roleSelect').classList.remove('hidden');
         document.getElementById('loginPage').classList.remove('active');
-        selectedRole = null;
         document.getElementById('email').value = '';
         document.getElementById('password').value = '';
-    }
-    
-    function doLogin() {
-        const email = document.getElementById('email').value.trim();
-        const pass = document.getElementById('password').value;
-        
-        console.log('🔐 Iniciando login con:', email);
-        
-        if (!email || !pass) {
-            showError('Completa email y contraseña');
-            return;
-        }
-        
-        if (!db) {
-            showError('BD no inicializada');
-            return;
-        }
-        
-        db.from('users')
-            .select('*')
-            .eq('email', email)
-            .then(response => {
-                console.log('📦 Respuesta completa:', response);
-                
-                const { data, error } = response;
-                
-                if (error) {
-                    console.error('❌ Error BD:', error.message, error.details);
-                    showError('Error BD: ' + error.message);
-                    return;
-                }
-                
-                console.log('✅ Datos recibidos:', data);
-                
-                if (!data || data.length === 0) {
-                    console.log('❌ No hay usuarios con ese email');
-                    showError('Email no encontrado');
-                    return;
-                }
-                
-                const user = data[0];
-                console.log('✅ Usuario encontrado:', user.full_name);
-                
-                if (user.password_hash !== pass) {
-                    console.log('❌ Contraseña incorrecta');
-                    showError('Contraseña incorrecta');
-                    return;
-                }
-                
-                console.log('✅✅ Login exitoso');
-                currentUser = user;
-                localStorage.user = JSON.stringify(currentUser);
-                showApp();
-            })
-            .catch(err => {
-                console.error('❌ Error en catch:', err);
-                showError('Error: ' + err.message);
-            });
     }
     
     function showError(msg) {
@@ -725,258 +230,220 @@
         setTimeout(() => el.classList.remove('show'), 5000);
     }
     
-    function showApp() {
+    async function doLogin() {
+        const email = document.getElementById('email').value.trim();
+        const pass = document.getElementById('password').value;
+        
+        console.log('🔐 Login attempt:', email);
+        
+        if (!email || !pass) {
+            showError('Completa email y contraseña');
+            return;
+        }
+        
+        try {
+            console.log('📡 Querying users table...');
+            const response = await db.from('users').select('*').eq('email', email);
+            console.log('📦 Response:', response);
+            
+            const { data, error } = response;
+            console.log('📊 Data:', data);
+            console.log('⚠️ Error:', error);
+            
+            if (error) {
+                console.error('❌ Error BD:', error);
+                showError('Error BD: ' + (error?.message || 'Desconocido'));
+                return;
+            }
+            
+            if (!data || data.length === 0) {
+                console.log('❌ No user found');
+                showError('Email no encontrado');
+                return;
+            }
+            
+            const user = data[0];
+            console.log('✅ User found:', user.full_name);
+            
+            if (user.password_hash !== pass) {
+                console.log('❌ Wrong password');
+                showError('Contraseña incorrecta');
+                return;
+            }
+            
+            console.log('✅✅ Login SUCCESS');
+            currentUser = user;
+            localStorage.user = JSON.stringify(currentUser);
+            showApp();
+        } catch (e) {
+            console.error('❌ Exception:', e);
+            showError('Error: ' + e.message);
+        }
+    }
+    
+    async function showApp() {
         document.getElementById('loginPage').classList.remove('active');
         document.getElementById('app').classList.add('active');
         document.getElementById('userName').textContent = currentUser.full_name;
         
         if (currentUser.role === 'admin') {
             document.getElementById('adminMenu').classList.add('active');
-            loadAdminDashboard();
+            loadDash();
         } else {
             document.getElementById('practMenu').classList.add('active');
-            loadEvaluations();
+            loadEvals();
         }
     }
     
-    function loadAdminDashboard() {
-        db.from('practitioners')
-            .select('*')
-            .then(({ data: pract, error: e1 }) => {
-                if (e1) {
-                    console.error('Error cargando practitioners:', e1.message);
-                    return;
-                }
-                
-                db.from('modules')
-                    .select('*')
-                    .then(({ data: mods, error: e2 }) => {
-                        if (e2) {
-                            console.error('Error cargando modules:', e2.message);
-                            return;
-                        }
-                        
-                        db.from('blocks')
-                            .select('*')
-                            .eq('is_published', true)
-                            .then(({ data: blocks, error: e3 }) => {
-                                if (e3) {
-                                    console.error('Error cargando blocks:', e3.message);
-                                    return;
-                                }
-                                
-                                document.getElementById('countPract').textContent = pract?.length || 0;
-                                document.getElementById('countMods').textContent = mods?.length || 0;
-                                document.getElementById('countBlocks').textContent = blocks?.length || 0;
-                                
-                                loadPractTable();
-                                loadModules();
-                            });
+    async function loadDash() {
+        try {
+            const { data: pract } = await db.from('practitioners').select('*');
+            const { data: mods } = await db.from('modules').select('*');
+            const { data: blocks } = await db.from('blocks').select('*').eq('is_published', true);
+            
+            document.getElementById('countPract').textContent = pract?.length || 0;
+            document.getElementById('countMods').textContent = mods?.length || 0;
+            document.getElementById('countBlocks').textContent = blocks?.length || 0;
+            
+            loadPractTable();
+            loadMods();
+        } catch (e) {
+            console.error('Error:', e);
+        }
+    }
+    
+    async function loadPractTable() {
+        try {
+            const { data } = await db.from('practitioners').select('*').order('first_name');
+            const tb = document.getElementById('practTable');
+            tb.innerHTML = '';
+            
+            if (data?.length) {
+                data.forEach(p => {
+                    tb.innerHTML += `<tr><td><strong>${p.first_name} ${p.last_name}</strong></td><td>${p.username}</td><td><span class="badge ${p.is_active ? 'badge-active' : 'badge-inactive'}">${p.is_active ? 'Activo' : 'Inactivo'}</span></td></tr>`;
+                });
+            } else {
+                tb.innerHTML = '<tr><td colspan="3" class="empty">Sin participantes</td></tr>';
+            }
+        } catch (e) {
+            console.error('Error:', e);
+        }
+    }
+    
+    async function loadMods() {
+        try {
+            const { data: mods } = await db.from('modules').select('*').order('order_number');
+            const { data: blocks } = await db.from('blocks').select('*').order('order_number');
+            
+            const div = document.getElementById('modsContainer');
+            div.innerHTML = '';
+            
+            if (mods?.length) {
+                mods.forEach(m => {
+                    const myBlocks = blocks.filter(b => b.module_id === m.id) || [];
+                    let html = `<div style="margin-bottom: 30px;"><h4 style="font-size: 1.1em; font-weight: 600; margin-bottom: 15px; color: #333;">${m.name}</h4><p style="font-size: 0.9em; color: #777; margin-bottom: 12px;">Puntos: <strong>${m.total_points}</strong></p>`;
+                    
+                    myBlocks.forEach(b => {
+                        const estado = b.is_published ? 'PUBLICADO' : 'PRIVADO';
+                        const btn = b.is_published ? 'Despublicar' : 'Publicar';
+                        html += `<div class="blockItem"><div class="blockInfo"><strong>${b.name}</strong><p>Puntos: ${b.total_points}</p><p class="blockState ${b.is_published ? 'pub' : 'priv'}">${estado}</p></div><button class="btn" onclick="toggleBlock(${b.id}, ${!b.is_published})">${btn}</button></div>`;
                     });
-            });
+                    
+                    html += `</div>`;
+                    div.innerHTML += html;
+                });
+            }
+        } catch (e) {
+            console.error('Error:', e);
+        }
     }
     
-    function loadPractTable() {
-        db.from('practitioners')
-            .select('*')
-            .order('first_name')
-            .then(({ data, error }) => {
-                if (error) {
-                    console.error('Error cargando tabla:', error.message);
-                    return;
-                }
-                
-                const tb = document.getElementById('practTable');
-                tb.innerHTML = '';
-                
-                if (data?.length) {
-                    data.forEach(p => {
-                        tb.innerHTML += `<tr>
-                            <td><strong>${p.first_name} ${p.last_name}</strong></td>
-                            <td>${p.username}</td>
-                            <td><span class="badge ${p.is_active ? 'badge-active' : 'badge-inactive'}">${p.is_active ? 'Activo' : 'Inactivo'}</span></td>
-                        </tr>`;
-                    });
-                } else {
-                    tb.innerHTML = '<tr><td colspan="3" class="empty">Sin participantes</td></tr>';
-                }
-            });
+    async function toggleBlock(id, pub) {
+        try {
+            await db.from('blocks').update({ is_published: pub, published_at: pub ? new Date().toISOString() : null }).eq('id', id);
+            alert(pub ? 'Bloque publicado' : 'Bloque despublicado');
+            loadMods();
+            loadDash();
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
     }
     
-    function loadModules() {
-        db.from('modules')
-            .select('*')
-            .order('order_number')
-            .then(({ data: mods, error: e1 }) => {
-                if (e1) {
-                    console.error('Error cargando modules:', e1.message);
-                    return;
-                }
-                
-                db.from('blocks')
-                    .select('*')
-                    .order('order_number')
-                    .then(({ data: blocks, error: e2 }) => {
-                        if (e2) {
-                            console.error('Error cargando blocks:', e2.message);
-                            return;
-                        }
-                        
-                        const div = document.getElementById('modsContainer');
-                        div.innerHTML = '';
-                        
-                        if (mods?.length) {
-                            mods.forEach(m => {
-                                const myBlocks = blocks.filter(b => b.module_id === m.id) || [];
-                                let html = `<div style="margin-bottom: 30px;">
-                                    <h4 style="font-size: 1.1em; font-weight: 600; margin-bottom: 15px; color: #333;">${m.name}</h4>
-                                    <p style="font-size: 0.9em; color: #777; margin-bottom: 12px;">Puntos: <strong>${m.total_points}</strong></p>`;
-                                
-                                myBlocks.forEach(b => {
-                                    const estado = b.is_published ? 'PUBLICADO' : 'PRIVADO';
-                                    const btn = b.is_published ? 'Despublicar' : 'Publicar';
-                                    html += `<div class="blockItem">
-                                        <div class="blockInfo">
-                                            <strong>${b.name}</strong>
-                                            <p>Puntos: ${b.total_points}</p>
-                                            <p class="blockState ${b.is_published ? 'pub' : 'priv'}">${estado}</p>
-                                        </div>
-                                        <button class="btn" onclick="toggleBlock(${b.id}, ${!b.is_published})">${btn}</button>
-                                    </div>`;
-                                });
-                                
-                                html += `</div>`;
-                                div.innerHTML += html;
-                            });
-                        }
-                    });
-            });
-    }
-    
-    function toggleBlock(id, pub) {
-        console.log('Toggling block', id, 'to', pub);
-        db.from('blocks')
-            .update({ is_published: pub, published_at: pub ? new Date().toISOString() : null })
-            .eq('id', id)
-            .then(({ error }) => {
-                if (error) {
-                    alert('Error: ' + error.message);
-                    return;
-                }
-                alert(pub ? 'Bloque publicado' : 'Bloque despublicado');
-                loadModules();
-                loadAdminDashboard();
-            });
-    }
-    
-    function createPractitioner() {
-        console.log('Creating participant...');
+    async function createPractitioner() {
         const name = prompt('Nombre:');
         if (!name) return;
         const lname = prompt('Apellido:');
         if (!lname) return;
-        const uname = prompt('Usuario (ej: nombre.apellido):');
+        const uname = prompt('Usuario:');
         if (!uname) return;
         
         const pwd = Math.random().toString(36).slice(-8);
-        console.log('Generated password:', pwd);
         
-        db.from('users')
-            .insert({
+        try {
+            const { data: newUser } = await db.from('users').insert({
                 email: `${uname}@impulsa.local`,
                 password_hash: pwd,
                 full_name: `${name} ${lname}`,
                 role: 'practicante',
                 is_active: true
-            })
-            .select()
-            .single()
-            .then(({ data: newUser, error: errUser }) => {
-                if (errUser) {
-                    alert('Error creating user: ' + errUser.message);
-                    return;
-                }
-                console.log('✅ User created:', newUser.id);
+            }).select();
+            
+            if (newUser?.length) {
+                await db.from('practitioners').insert({
+                    user_id: newUser[0].id,
+                    first_name: name,
+                    last_name: lname,
+                    username: uname,
+                    email: `${uname}@impulsa.local`,
+                    is_active: true
+                });
                 
-                db.from('practitioners')
-                    .insert({
-                        user_id: newUser.id,
-                        first_name: name,
-                        last_name: lname,
-                        username: uname,
-                        email: `${uname}@impulsa.local`,
-                        is_active: true
-                    })
-                    .then(({ error: errPract }) => {
-                        if (errPract) {
-                            alert('Error creating practitioner: ' + errPract.message);
-                            return;
-                        }
-                        console.log('✅ Practitioner created');
-                        alert(`Participante Creado\n\nUsuario: ${uname}\nContraseña: ${pwd}`);
-                        loadPractTable();
-                        loadAdminDashboard();
-                    });
-            });
+                alert(`Participante Creado\n\nUsuario: ${uname}\nContraseña: ${pwd}`);
+                loadPractTable();
+                loadDash();
+            }
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
     }
     
-    function loadEvaluations() {
-        db.from('blocks')
-            .select('*')
-            .eq('is_published', true)
-            .order('module_id')
-            .then(({ data: blocks, error }) => {
-                if (error) {
-                    console.error('Error cargando evaluaciones:', error.message);
-                    return;
-                }
-                
-                const div = document.getElementById('evalContainer');
-                div.innerHTML = '';
-                
-                if (blocks?.length) {
-                    blocks.forEach(b => {
-                        div.innerHTML += `<div class="blockItem">
-                            <div class="blockInfo">
-                                <strong>${b.name}</strong>
-                                <p>Puntos: ${b.total_points}</p>
-                                <p class="blockState pub">Disponible</p>
-                            </div>
-                        </div>`;
-                    });
-                } else {
-                    div.innerHTML = '<div class="empty">No hay evaluaciones disponibles</div>';
-                }
-            });
+    async function loadEvals() {
+        try {
+            const { data: blocks } = await db.from('blocks').select('*').eq('is_published', true).order('module_id');
+            const div = document.getElementById('evalContainer');
+            div.innerHTML = '';
+            
+            if (blocks?.length) {
+                blocks.forEach(b => {
+                    div.innerHTML += `<div class="blockItem"><div class="blockInfo"><strong>${b.name}</strong><p>Puntos: ${b.total_points}</p><p class="blockState pub">Disponible</p></div></div>`;
+                });
+            } else {
+                div.innerHTML = '<div class="empty">No hay evaluaciones disponibles</div>';
+            }
+        } catch (e) {
+            console.error('Error:', e);
+        }
     }
     
     function goSection(id) {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        
         document.querySelectorAll('.sidebarItem').forEach(i => i.classList.remove('active'));
         event.target.classList.add('active');
-        
         const titles = { dash: 'Dashboard', pract: 'Participantes', mods: 'Módulos', eval: 'Mis Evaluaciones', prof: 'Mi Perfil' };
         document.getElementById('pageTitle').textContent = titles[id] || 'Portal';
     }
     
     function doLogout() {
-        if (confirm('¿Salir del portal?')) {
+        if (confirm('¿Salir?')) {
             localStorage.removeItem('user');
             location.reload();
         }
     }
     
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('🚀 Página cargada');
         initDB();
-        
-        document.getElementById('btnLogin').addEventListener('click', doLogin);
         document.getElementById('password').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') doLogin();
-        });
-        document.getElementById('email').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') doLogin();
         });
         
@@ -985,13 +452,12 @@
             document.getElementById('roleSelect').classList.add('hidden');
             document.getElementById('app').classList.add('active');
             document.getElementById('userName').textContent = currentUser.full_name;
-            
             if (currentUser.role === 'admin') {
                 document.getElementById('adminMenu').classList.add('active');
-                loadAdminDashboard();
+                loadDash();
             } else {
                 document.getElementById('practMenu').classList.add('active');
-                loadEvaluations();
+                loadEvals();
             }
         }
     });
