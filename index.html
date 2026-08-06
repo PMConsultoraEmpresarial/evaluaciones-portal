@@ -274,7 +274,10 @@
             console.log('✅✅ Login SUCCESS');
             currentUser = user;
             localStorage.user = JSON.stringify(currentUser);
-            showApp();
+            console.log('💾 User saved to localStorage');
+            
+            await showApp();
+            console.log('🎉 App fully loaded');
         } catch (e) {
             console.error('❌ Exception:', e);
             showError('Error: ' + e.message);
@@ -282,33 +285,63 @@
     }
     
     async function showApp() {
-        document.getElementById('loginPage').classList.remove('active');
-        document.getElementById('app').classList.add('active');
+        console.log('🎯 showApp iniciado');
+        console.log('👤 currentUser:', currentUser);
+        
+        const loginEl = document.getElementById('loginPage');
+        const appEl = document.getElementById('app');
+        console.log('📍 loginPage:', loginEl, 'app:', appEl);
+        
+        loginEl.classList.remove('active');
+        console.log('✅ Login hidden');
+        
+        appEl.classList.add('active');
+        console.log('✅ App shown');
+        
         document.getElementById('userName').textContent = currentUser.full_name;
+        console.log('✅ Username set:', currentUser.full_name);
         
         if (currentUser.role === 'admin') {
+            console.log('👨‍💼 Admin detected - loading dashboard');
             document.getElementById('adminMenu').classList.add('active');
-            loadDash();
+            await loadDash();
+            console.log('✅ Dashboard loaded');
         } else {
+            console.log('📋 Practicante detected - loading evals');
             document.getElementById('practMenu').classList.add('active');
-            loadEvals();
+            await loadEvals();
+            console.log('✅ Evals loaded');
         }
     }
     
     async function loadDash() {
         try {
-            const { data: pract } = await db.from('practitioners').select('*');
-            const { data: mods } = await db.from('modules').select('*');
-            const { data: blocks } = await db.from('blocks').select('*').eq('is_published', true);
+            console.log('📊 loadDash iniciado');
+            
+            const pResp = await db.from('practitioners').select('*');
+            console.log('1️⃣ Practitioners:', pResp);
+            const { data: pract } = pResp;
+            
+            const mResp = await db.from('modules').select('*');
+            console.log('2️⃣ Modules:', mResp);
+            const { data: mods } = mResp;
+            
+            const bResp = await db.from('blocks').select('*').eq('is_published', true);
+            console.log('3️⃣ Blocks:', bResp);
+            const { data: blocks } = bResp;
             
             document.getElementById('countPract').textContent = pract?.length || 0;
             document.getElementById('countMods').textContent = mods?.length || 0;
             document.getElementById('countBlocks').textContent = blocks?.length || 0;
+            console.log('✅ Stats updated');
             
-            loadPractTable();
-            loadMods();
+            await loadPractTable();
+            console.log('✅ Pract table loaded');
+            
+            await loadMods();
+            console.log('✅ Modules loaded');
         } catch (e) {
-            console.error('Error:', e);
+            console.error('❌ loadDash error:', e);
         }
     }
     
