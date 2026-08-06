@@ -3,1425 +3,372 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IMPULSA RH - Portal de Evaluaciones</title>
+    <title>IMPULSA RH - Portal</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            overflow: hidden;
-        }
-
-        /* LOGIN PAGE */
-        .login-page {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .login-left {
-            flex: 1;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 50px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .login-left h1 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-        }
-
-        .login-left p {
-            font-size: 1.1em;
-            opacity: 0.9;
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
-
-        .login-right {
-            flex: 1;
-            padding: 50px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .login-right h2 {
-            margin-bottom: 30px;
-            color: #333;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 1em;
-            transition: border-color 0.3s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 5px;
-            font-size: 1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .error-message {
-            background: #fee;
-            color: #c33;
-            padding: 12px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
-        }
-
-        /* MAIN APP */
-        .app-container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            width: 250px;
-            background: #2c3e50;
-            color: white;
-            padding: 20px;
-            overflow-y: auto;
-        }
-
-        .sidebar h3 {
-            margin-bottom: 20px;
-            font-size: 0.9em;
-            text-transform: uppercase;
-            opacity: 0.7;
-        }
-
-        .sidebar-item {
-            padding: 12px 15px;
-            margin-bottom: 5px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
-            border-left: 4px solid transparent;
-        }
-
-        .sidebar-item:hover {
-            background: rgba(255,255,255,0.1);
-        }
-
-        .sidebar-item.active {
-            background: #667eea;
-            border-left-color: #fff;
-        }
-
-        .main-content {
-            flex: 1;
-            padding: 30px;
-            background: #f5f7fa;
-            overflow-y: auto;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        .header h1 {
-            color: #2c3e50;
-            font-size: 1.8em;
-        }
-
-        .user-info {
-            text-align: right;
-        }
-
-        .user-info p {
-            color: #666;
-            margin-bottom: 8px;
-        }
-
-        .btn-small {
-            padding: 8px 16px;
-            font-size: 0.9em;
-            margin-left: 10px;
-        }
-
-        .btn-danger {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c0392b;
-        }
-
-        .btn-success {
-            background: #27ae60;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #229954;
-        }
-
-        /* CARDS */
-        .card {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .card h3 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-        }
-
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        /* TABLE */
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-
-        th {
-            background: #ecf0f1;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-
-        tr:hover {
-            background: #f9f9f9;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 600;
-        }
-
-        .status-active {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-inactive {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-completed {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-
-        /* MODALS */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            border-radius: 8px;
-            padding: 30px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #ecf0f1;
-        }
-
-        .modal-header h2 {
-            color: #2c3e50;
-            margin: 0;
-        }
-
-        .modal-close {
-            float: right;
-            font-size: 1.5em;
-            cursor: pointer;
-            color: #999;
-        }
-
-        .modal-close:hover {
-            color: #333;
-        }
-
-        .success-message {
-            background: #d4edda;
-            color: #155724;
-            padding: 12px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .success-message.show {
-            display: block;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #ecf0f1;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 10px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            border-radius: 4px;
-            transition: width 0.3s;
-        }
-
-        /* INDICATORS */
-        .indicator-list {
-            margin-top: 15px;
-            padding-left: 20px;
-        }
-
-        .indicator-item {
-            margin-bottom: 10px;
-            padding: 10px;
-            background: #f9f9f9;
-            border-left: 4px solid #667eea;
-            border-radius: 3px;
-        }
-
-        .indicator-item strong {
-            color: #2c3e50;
-        }
-
-        .indicator-item p {
-            color: #666;
-            margin: 5px 0 0 0;
-            font-size: 0.9em;
-        }
-
-        .rating-scale {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .rating-option {
-            flex: 1;
-            padding: 10px;
-            text-align: center;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .rating-option:hover {
-            border-color: #667eea;
-        }
-
-        .rating-option.selected {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-
-        /* LOADING */
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .app-container {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
-                display: flex;
-                overflow-x: auto;
-            }
-
-            .sidebar-item {
-                white-space: nowrap;
-                margin-right: 10px;
-            }
-
-            .login-page {
-                flex-direction: column;
-            }
-
-            .card-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .user-info {
-                text-align: left;
-                margin-top: 15px;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .login-container { display: flex; height: 100vh; }
+        .login-left { flex: 1; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 50px; display: flex; flex-direction: column; justify-content: center; }
+        .login-left h1 { font-size: 2.5em; margin-bottom: 20px; }
+        .login-left p { font-size: 1.1em; opacity: 0.9; margin-bottom: 15px; }
+        .login-right { flex: 1; background: white; padding: 50px; display: flex; flex-direction: column; justify-content: center; }
+        .login-right h2 { color: #333; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #555; font-weight: 600; }
+        .form-group input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 5px; font-size: 1em; }
+        .form-group input:focus { outline: none; border-color: #667eea; }
+        .btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 5px; font-size: 1em; font-weight: 600; cursor: pointer; margin-top: 20px; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
+        .error { background: #fee; color: #c33; padding: 12px; border-radius: 5px; margin-bottom: 20px; display: none; }
+        .error.show { display: block; }
+        .app { display: none; flex: 1; flex-direction: row; }
+        .sidebar { width: 250px; background: #2c3e50; color: white; padding: 20px; }
+        .sidebar h3 { margin-bottom: 20px; font-size: 0.9em; text-transform: uppercase; opacity: 0.7; }
+        .sidebar-item { padding: 12px 15px; margin-bottom: 5px; border-radius: 5px; cursor: pointer; }
+        .sidebar-item:hover { background: rgba(255,255,255,0.1); }
+        .sidebar-item.active { background: #667eea; }
+        .content { flex: 1; padding: 30px; background: #f5f7fa; overflow-y: auto; }
+        .card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .card h3 { color: #2c3e50; margin-bottom: 15px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #ecf0f1; font-weight: 600; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 600; }
+        .badge-active { background: #d4edda; color: #155724; }
+        .badge-inactive { background: #f8d7da; color: #721c24; }
+        .btn-small { padding: 6px 12px; font-size: 0.85em; margin: 0 5px; }
+        .header { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .header h1 { color: #2c3e50; margin-bottom: 10px; }
+        .user-info { color: #666; }
     </style>
 </head>
 <body>
 
-<!-- LOGIN PAGE -->
-<div id="loginPage" class="login-page">
+<!-- LOGIN -->
+<div id="loginPage" class="login-container">
     <div class="login-left">
         <h1>🎓 IMPULSA RH</h1>
-        <p>Portal de Evaluaciones del Programa IMPULSA RH</p>
-        <p>Sistema integral de gestión de competencias y desarrollo profesional</p>
-        <div style="margin-top: 40px; font-size: 0.9em; opacity: 0.8;">
-            <p>Por favor, ingresa con tus credenciales de acceso.</p>
-            <p>Si no tienes acceso, contacta al administrador.</p>
-        </div>
+        <p>Portal de Evaluaciones</p>
+        <p>Programa IMPULSA RH - 6ta Edición</p>
+        <p style="margin-top: 40px; font-size: 0.9em;">Sistema de gestión integral de competencias y desarrollo profesional para participantes.</p>
     </div>
     <div class="login-right">
-        <h2>Ingresa a tu Cuenta</h2>
-        <div class="error-message" id="loginError"></div>
+        <h2>Acceso al Portal</h2>
+        <div class="error" id="errorMsg"></div>
         <div class="form-group">
-            <label for="loginEmail">Email o Usuario</label>
-            <input type="text" id="loginEmail" placeholder="tu@email.com o tu.usuario">
+            <label>Email</label>
+            <input type="text" id="email" placeholder="tu@email.com">
         </div>
         <div class="form-group">
-            <label for="loginPassword">Contraseña</label>
-            <input type="password" id="loginPassword" placeholder="Tu contraseña">
+            <label>Contraseña</label>
+            <input type="password" id="password" placeholder="Tu contraseña">
         </div>
-        <button class="btn btn-primary" onclick="loginUser()">Ingresar</button>
+        <button class="btn" onclick="hacerLogin()">Ingresar</button>
+        <p style="text-align: center; margin-top: 20px; color: #999; font-size: 0.9em;">
+            Si no tienes acceso, contacta al administrador.
+        </p>
     </div>
 </div>
 
-<!-- MAIN APP -->
-<div id="mainApp" class="app-container" style="display: none;">
+<!-- APP -->
+<div id="appPage" class="app">
     <!-- SIDEBAR -->
     <div class="sidebar">
         <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1);">
             <h3>👤 Menú</h3>
         </div>
 
-        <!-- ADMIN MENU -->
         <div id="adminMenu" style="display: none;">
-            <h3>Administrador</h3>
-            <div class="sidebar-item active" onclick="showSection('adminDashboard')">
-                📊 Dashboard
-            </div>
-            <div class="sidebar-item" onclick="showSection('adminConfig')">
-                ⚙️ Configuración
-            </div>
-            <div class="sidebar-item" onclick="showSection('adminModules')">
-                📚 Módulos y Bloques
-            </div>
-            <div class="sidebar-item" onclick="showSection('adminGrade')">
-                👥 Calificar
-            </div>
-            <div class="sidebar-item" onclick="showSection('adminReports')">
-                📈 Reportes
-            </div>
+            <h3>Admin</h3>
+            <div class="sidebar-item active" onclick="irSeccion('dashboard')">📊 Dashboard</div>
+            <div class="sidebar-item" onclick="irSeccion('participantes')">👥 Participantes</div>
+            <div class="sidebar-item" onclick="irSeccion('modulos')">📚 Módulos</div>
         </div>
 
-        <!-- PRACTITIONER MENU -->
-        <div id="practitionerMenu" style="display: none;">
+        <div id="practMenu" style="display: none;">
             <h3>Participante</h3>
-            <div class="sidebar-item active" onclick="showSection('practitionerDash')">
-                📋 Mis Evaluaciones
-            </div>
-            <div class="sidebar-item" onclick="showSection('practitionerModules')">
-                📚 Módulos
-            </div>
-            <div class="sidebar-item" onclick="showSection('practitionerScores')">
-                📊 Mis Calificaciones
-            </div>
-            <div class="sidebar-item" onclick="showSection('practitionerProfile')">
-                👤 Mi Perfil
-            </div>
+            <div class="sidebar-item active" onclick="irSeccion('misevaluaciones')">📋 Mis Evaluaciones</div>
+            <div class="sidebar-item" onclick="irSeccion('perfil')">👤 Mi Perfil</div>
         </div>
 
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
-            <button class="btn btn-danger btn-small" onclick="logoutUser()" style="width: 100%;">🚪 Cerrar Sesión</button>
+            <button class="btn btn-small" onclick="hacerLogout()" style="width: 100%; background: #e74c3c;">🚪 Salir</button>
         </div>
     </div>
 
-    <!-- MAIN CONTENT -->
-    <div class="main-content">
-        <!-- HEADER -->
+    <!-- CONTENT -->
+    <div class="content">
         <div class="header">
-            <div>
-                <h1 id="pageTitle">Dashboard</h1>
-            </div>
+            <h1 id="titulo">Dashboard</h1>
             <div class="user-info">
-                <p><strong id="currentUserName">Usuario</strong></p>
-                <p id="currentUserEmail" style="font-size: 0.9em;">email@example.com</p>
+                <p><strong id="usuario">Usuario</strong></p>
             </div>
         </div>
 
-        <!-- ADMIN DASHBOARD -->
-        <div id="adminDashboard" class="section" style="display: none;">
-            <div class="card-grid">
-                <div class="card">
-                    <h3>👥 Participantes Activos</h3>
-                    <p style="font-size: 2em; color: #667eea; font-weight: bold;" id="totalPractitioners">0</p>
-                </div>
-                <div class="card">
-                    <h3>📚 Bloques Publicados</h3>
-                    <p style="font-size: 2em; color: #667eea; font-weight: bold;" id="totalPublished">0</p>
-                </div>
-                <div class="card">
-                    <h3>✅ Evaluaciones Completadas</h3>
-                    <p style="font-size: 2em; color: #667eea; font-weight: bold;" id="totalEvaluated">0</p>
-                </div>
-            </div>
-
+        <!-- DASHBOARD -->
+        <div id="dashboard" style="display: none;">
             <div class="card">
-                <h3>Últimas Evaluaciones</h3>
-                <div class="table-responsive">
-                    <table id="recentScoresTable">
-                        <thead>
-                            <tr>
-                                <th>Participante</th>
-                                <th>Bloque</th>
-                                <th>Calificación</th>
-                                <th>Fecha</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
+                <h3>Bienvenida al Portal</h3>
+                <p><strong>Participantes activos:</strong> <span id="totalPract">0</span></p>
+                <p><strong>Módulos:</strong> <span id="totalMod">0</span></p>
+                <p><strong>Bloques publicados:</strong> <span id="totalBlq">0</span></p>
             </div>
         </div>
 
-        <!-- ADMIN CONFIGURATION -->
-        <div id="adminConfig" class="section" style="display: none;">
-            <!-- MY ACCOUNT TAB -->
+        <!-- PARTICIPANTES -->
+        <div id="participantes" style="display: none;">
             <div class="card">
-                <h3>Mi Cuenta</h3>
-                <div style="margin-top: 20px;">
-                    <p><strong>Email:</strong> <span id="adminEmailDisplay">-</span></p>
-                    <hr style="margin: 15px 0;">
-                    <h4 style="margin-bottom: 15px;">Cambiar Contraseña</h4>
-                    <div class="form-group">
-                        <label>Contraseña Actual</label>
-                        <input type="password" id="currentPassword" placeholder="Tu contraseña actual">
-                    </div>
-                    <div class="form-group">
-                        <label>Nueva Contraseña</label>
-                        <input type="password" id="newPassword" placeholder="Nueva contraseña">
-                    </div>
-                    <div class="form-group">
-                        <label>Confirmar Nueva Contraseña</label>
-                        <input type="password" id="confirmPassword" placeholder="Confirmar nueva contraseña">
-                    </div>
-                    <button class="btn btn-success" onclick="changeAdminPassword()">Cambiar Contraseña</button>
-                </div>
-            </div>
-
-            <!-- PARTICIPANTS TAB -->
-            <div class="card" style="margin-top: 30px;">
                 <h3>Gestión de Participantes</h3>
-                <button class="btn btn-primary" onclick="openAddParticipantModal()" style="margin-bottom: 20px;">+ Agregar Nuevo Participante</button>
-                
-                <div class="table-responsive">
-                    <table id="participantsTable">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Usuario</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
+                <button class="btn btn-small" onclick="abrirAgregarPract()" style="width: auto; margin-bottom: 20px;">+ Agregar</button>
+                <table id="tablaPract">
+                    <thead>
+                        <tr><th>Nombre</th><th>Usuario</th><th>Estado</th><th>Acciones</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
         </div>
 
-        <!-- ADMIN MODULES -->
-        <div id="adminModules" class="section" style="display: none;">
-            <div id="modulesContainer"></div>
-        </div>
-
-        <!-- ADMIN GRADE -->
-        <div id="adminGrade" class="section" style="display: none;">
+        <!-- MODULOS -->
+        <div id="modulos" style="display: none;">
             <div class="card">
-                <h3>Selecciona Participante para Calificar</h3>
-                <div class="form-group">
-                    <label>Participante</label>
-                    <select id="gradePractitioner" onchange="loadPractitionerForGrading()">
-                        <option value="">-- Selecciona un participante --</option>
-                    </select>
-                </div>
-                <div id="gradingContainer"></div>
+                <h3>Módulos y Bloques</h3>
+                <div id="listaModulos"></div>
             </div>
         </div>
 
-        <!-- ADMIN REPORTS -->
-        <div id="adminReports" class="section" style="display: none;">
+        <!-- MIS EVALUACIONES -->
+        <div id="misevaluaciones" style="display: none;">
             <div class="card">
-                <h3>Reportes por Participante</h3>
-                <div id="reportsContainer"></div>
+                <h3>Mis Evaluaciones</h3>
+                <p>Puntos totales: <strong>0 / 100</strong></p>
             </div>
         </div>
 
-        <!-- PRACTITIONER DASHBOARD -->
-        <div id="practitionerDash" class="section" style="display: none;">
-            <div class="card">
-                <h3>Puntos Totales</h3>
-                <p style="font-size: 2em; color: #667eea; font-weight: bold;" id="totalPointsPract">0 / 100</p>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
-                </div>
-            </div>
-
-            <div id="modulesProgressContainer"></div>
-        </div>
-
-        <!-- PRACTITIONER MODULES -->
-        <div id="practitionerModules" class="section" style="display: none;">
-            <div id="availableModulesContainer"></div>
-        </div>
-
-        <!-- PRACTITIONER SCORES -->
-        <div id="practitionerScores" class="section" style="display: none;">
-            <div class="card">
-                <h3>Historial de Calificaciones</h3>
-                <div id="scoresHistoryContainer"></div>
-            </div>
-        </div>
-
-        <!-- PRACTITIONER PROFILE -->
-        <div id="practitionerProfile" class="section" style="display: none;">
+        <!-- PERFIL -->
+        <div id="perfil" style="display: none;">
             <div class="card">
                 <h3>Mi Perfil</h3>
-                <p><strong>Nombre:</strong> <span id="profileName">-</span></p>
-                <p><strong>Usuario:</strong> <span id="profileUsername">-</span></p>
-                <p><strong>Email:</strong> <span id="profileEmail">-</span></p>
-                <p><strong>Departamento:</strong> <span id="profileDept">-</span></p>
-                <hr style="margin: 20px 0;">
-                <h4 style="margin-bottom: 15px;">Cambiar Contraseña</h4>
-                <div class="form-group">
-                    <label>Contraseña Actual</label>
-                    <input type="password" id="practCurrentPassword" placeholder="Tu contraseña actual">
-                </div>
-                <div class="form-group">
-                    <label>Nueva Contraseña</label>
-                    <input type="password" id="practNewPassword" placeholder="Nueva contraseña">
-                </div>
-                <div class="form-group">
-                    <label>Confirmar Nueva Contraseña</label>
-                    <input type="password" id="practConfirmPassword" placeholder="Confirmar nueva contraseña">
-                </div>
-                <button class="btn btn-success" onclick="changePractitionerPassword()">Cambiar Contraseña</button>
+                <p><strong>Nombre:</strong> <span id="nombrePerfil">-</span></p>
+                <p><strong>Usuario:</strong> <span id="usuarioPerfil">-</span></p>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- MODALS -->
-<div id="addParticipantModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <span class="modal-close" onclick="closeModal('addParticipantModal')">&times;</span>
-            <h2>Agregar Nuevo Participante</h2>
-        </div>
-        <div class="success-message" id="participantSuccess"></div>
-        <div class="error-message" id="participantError"></div>
-        <div class="form-group">
-            <label>Nombre</label>
-            <input type="text" id="participantFirstName" placeholder="Nombre">
-        </div>
-        <div class="form-group">
-            <label>Apellido</label>
-            <input type="text" id="participantLastName" placeholder="Apellido">
-        </div>
-        <div class="form-group">
-            <label>Usuario</label>
-            <input type="text" id="participantUsername" placeholder="usuario.name">
-        </div>
-        <div class="form-group">
-            <label>Contraseña</label>
-            <input type="text" id="participantPassword" placeholder="Generar automáticamente">
-        </div>
-        <div class="form-group">
-            <label>Departamento (opcional)</label>
-            <input type="text" id="participantDept" placeholder="Departamento">
-        </div>
-        <button class="btn btn-success" onclick="saveNewParticipant()">Guardar Participante</button>
-    </div>
-</div>
-
-<div id="editParticipantModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <span class="modal-close" onclick="closeModal('editParticipantModal')">&times;</span>
-            <h2>Editar Participante</h2>
-        </div>
-        <div class="success-message" id="editSuccess"></div>
-        <div class="error-message" id="editError"></div>
-        <input type="hidden" id="editParticipantId">
-        <div class="form-group">
-            <label>Nombre Completo</label>
-            <p id="editParticipantName" style="font-weight: bold;"></p>
-        </div>
-        <div class="form-group">
-            <label>Usuario</label>
-            <p id="editParticipantUsername"></p>
-        </div>
-        <div class="form-group">
-            <label>Contraseña (dejar en blanco para no cambiar)</label>
-            <input type="text" id="editParticipantPassword" placeholder="Nueva contraseña">
-            <small style="display: block; margin-top: 5px;"><strong>Actual:</strong> <span id="currentPasswordDisplay" style="font-family: monospace;">••••••••</span></small>
-            <button class="btn btn-small btn-primary" onclick="copyPassword()" style="margin-top: 5px;">Copiar Contraseña</button>
-        </div>
-        <div class="form-group">
-            <label>Estado</label>
-            <div style="margin-top: 10px;">
-                <label><input type="radio" name="participantStatus" value="true" id="statusActive"> ✅ Activo</label>
-                <label style="margin-left: 20px;"><input type="radio" name="participantStatus" value="false" id="statusInactive"> ❌ Inactivo</label>
-            </div>
-        </div>
-        <button class="btn btn-success" onclick="saveEditParticipant()">Guardar Cambios</button>
     </div>
 </div>
 
 <script>
-    // SUPABASE CONFIG
+    // CONFIG
     const SUPABASE_URL = 'https://hczhiogytmuzsmfsnpbi.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhjemhpb2d5dG11enNtZnNucGJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5Nzk1NDAsImV4cCI6MjEwMTU1NTU0MH0.VOQ2KJRps0v24Bd_XC6xWrBx-5yrA_Hk6RMPUFpIbo4';
     
-    const { createClient } = window.supabase;
-    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    let db;
+    let usuarioActual = null;
 
-    let currentUser = null;
+    // INIT SUPABASE
+    function initDB() {
+        try {
+            const { createClient } = window.supabase;
+            db = createClient(SUPABASE_URL, SUPABASE_KEY);
+            console.log('✅ Supabase listo');
+            return true;
+        } catch (e) {
+            console.error('❌ Error Supabase:', e);
+            alert('Error al conectar a la base de datos. Recarga la página.');
+            return false;
+        }
+    }
 
     // LOGIN
-    async function loginUser() {
-        const email = document.getElementById('loginEmail').value.trim();
-        const password = document.getElementById('loginPassword').value;
+    async function hacerLogin() {
+        const email = document.getElementById('email').value.trim();
+        const pass = document.getElementById('password').value;
 
-        if (!email || !password) {
-            showLoginError('Por favor completa todos los campos');
+        if (!email || !pass) {
+            mostrarError('Completa email y contraseña');
             return;
         }
 
         try {
-            console.log('Intentando login con:', email);
-
-            // Buscar usuario por email
-            let { data: users, error: userError } = await supabase
+            console.log('🔐 Buscando usuario:', email);
+            
+            const { data: users, error: err } = await db
                 .from('users')
                 .select('*')
-                .eq('email', email);
+                .eq('email', email)
+                .limit(1);
 
-            if (userError) {
-                console.error('Error en query:', userError);
-                showLoginError('Error de conexión a la base de datos');
+            if (err) {
+                console.error('Error BD:', err);
+                mostrarError('Error de conexión');
                 return;
             }
 
             if (!users || users.length === 0) {
-                console.log('Usuario no encontrado:', email);
-                showLoginError('Usuario o contraseña incorrectos');
+                console.log('❌ Usuario no encontrado');
+                mostrarError('Email o contraseña incorrectos');
                 return;
             }
 
             const user = users[0];
-            console.log('Usuario encontrado:', user.full_name);
+            console.log('✅ Usuario encontrado:', user.full_name);
 
             // Validar contraseña
-            if (!validatePassword(password, user.password_hash)) {
-                console.log('Contraseña incorrecta');
-                showLoginError('Usuario o contraseña incorrectos');
+            if (user.password_hash !== pass) {
+                console.log('❌ Contraseña incorrecta');
+                mostrarError('Email o contraseña incorrectos');
                 return;
             }
 
             console.log('✅ Login exitoso');
+            usuarioActual = user;
+            localStorage.setItem('user', JSON.stringify(user));
+            mostrarApp();
 
-            // Actualizar último login
-            await supabase
-                .from('users')
-                .update({ last_login: new Date().toISOString() })
-                .eq('id', user.id);
-
-            // Guardar en sesión
-            currentUser = user;
-            localStorage.setItem('currentUser', JSON.stringify(user));
-
-            // Mostrar app
-            showApp();
-        } catch (err) {
-            console.error('Error en loginUser:', err);
-            showLoginError('Error al conectar. Intenta de nuevo.');
-        }
-    }
-
-    function validatePassword(input, hash) {
-        // Contraseña por defecto (para demo)
-        if (input === 'PMConsultora26') return hash.includes('PMConsultora26') || hash.includes('EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lm');
-        // Para practicantes, comparar directamente (en producción usar bcrypt.js)
-        return input === hash || simpleHashMatch(input, hash);
-    }
-
-    function simpleHashMatch(input, hash) {
-        // Hash simple para demo (en producción NO hacer esto)
-        if (!input || !hash) return false;
-        const btoa_input = btoa(input);
-        return hash === btoa_input || hash === input;
-    }
-
-    function showLoginError(message) {
-        const errorEl = document.getElementById('loginError');
-        errorEl.textContent = message;
-        errorEl.classList.add('show');
-        setTimeout(() => errorEl.classList.remove('show'), 5000);
-    }
-
-    // SHOW APP
-    function showApp() {
-        document.getElementById('loginPage').style.display = 'none';
-        document.getElementById('mainApp').style.display = 'flex';
-
-        // Actualizar UI según rol
-        if (currentUser.role === 'admin') {
-            document.getElementById('adminMenu').style.display = 'block';
-            document.getElementById('practitionerMenu').style.display = 'none';
-            document.getElementById('currentUserName').textContent = 'Administrador';
-            document.getElementById('currentUserEmail').textContent = currentUser.email;
-            document.getElementById('adminEmailDisplay').textContent = currentUser.email;
-            loadAdminDashboard();
-            showSection('adminDashboard');
-        } else {
-            document.getElementById('adminMenu').style.display = 'none';
-            document.getElementById('practitionerMenu').style.display = 'block';
-            document.getElementById('currentUserName').textContent = `${currentUser.full_name || 'Participante'}`;
-            document.getElementById('currentUserEmail').textContent = currentUser.email;
-            loadPractitionerDashboard();
-            showSection('practitionerDash');
-        }
-    }
-
-    // SHOW SECTION
-    function showSection(sectionId) {
-        // Ocultar todas las secciones
-        document.querySelectorAll('.section').forEach(el => el.style.display = 'none');
-        
-        // Mostrar sección seleccionada
-        document.getElementById(sectionId).style.display = 'block';
-
-        // Actualizar sidebar
-        document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
-        event.target.classList.add('active');
-
-        // Actualizar título
-        const titles = {
-            'adminDashboard': 'Dashboard',
-            'adminConfig': 'Configuración',
-            'adminModules': 'Módulos y Bloques',
-            'adminGrade': 'Calificar Participantes',
-            'adminReports': 'Reportes',
-            'practitionerDash': 'Mis Evaluaciones',
-            'practitionerModules': 'Módulos Disponibles',
-            'practitionerScores': 'Mis Calificaciones',
-            'practitionerProfile': 'Mi Perfil'
-        };
-        document.getElementById('pageTitle').textContent = titles[sectionId] || 'Portal';
-
-        // Cargar datos específicos según sección
-        if (sectionId === 'practitionerScores') loadScoresHistory();
-        if (sectionId === 'practitionerProfile') loadPractitionerProfile();
-        if (sectionId === 'adminReports') loadAdminReports();
-    }
-
-    // ADMIN FUNCTIONS
-    async function loadAdminDashboard() {
-        // Cargar participantes
-        let { data: practitioners } = await supabase.from('practitioners').select('*').eq('is_active', true);
-        document.getElementById('totalPractitioners').textContent = practitioners?.length || 0;
-
-        // Cargar bloques publicados
-        let { data: published } = await supabase.from('blocks').select('*').eq('is_published', true);
-        document.getElementById('totalPublished').textContent = published?.length || 0;
-
-        // Cargar evaluaciones completadas
-        let { data: evaluated } = await supabase.from('evaluation_scores').select('*');
-        document.getElementById('totalEvaluated').textContent = evaluated?.length || 0;
-
-        // Últimas evaluaciones
-        let { data: recent } = await supabase
-            .from('evaluation_scores')
-            .select('*, submission_id (evaluation_id (name, block_id (name)), practitioner_id (first_name, last_name))')
-            .order('rated_at', { ascending: false })
-            .limit(5);
-
-        // Mostrar en tabla (simplificado)
-        const tbody = document.querySelector('#recentScoresTable tbody');
-        tbody.innerHTML = '';
-        if (recent) {
-            recent.forEach(score => {
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td>-</td>
-                    <td>-</td>
-                    <td>${score.score}/${score.score}</td>
-                    <td>${new Date(score.rated_at).toLocaleDateString()}</td>
-                `;
-            });
-        }
-    }
-
-    async function loadPractitioners() {
-        const { data, error } = await supabase
-            .from('practitioners')
-            .select('*')
-            .order('first_name');
-
-        if (error) console.error(error);
-
-        const tbody = document.querySelector('#participantsTable tbody');
-        tbody.innerHTML = '';
-
-        if (data && data.length > 0) {
-            data.forEach(p => {
-                if (!p || !p.id) return;
-                const row = tbody.insertRow();
-                const fname = (p.first_name || 'N/A').toString().trim();
-                const lname = (p.last_name || '').toString().trim();
-                const uname = (p.username || 'N/A').toString().trim();
-                row.innerHTML = `
-                    <td>${fname} ${lname}</td>
-                    <td>${uname}</td>
-                    <td><span class="status-badge ${p.is_active ? 'status-active' : 'status-inactive'}">${p.is_active ? '✅ Activo' : '❌ Inactivo'}</span></td>
-                    <td>
-                        <button class="btn btn-small btn-primary" onclick="editParticipant('${p.id}')">Editar</button>
-                        <button class="btn btn-small btn-danger" onclick="deleteParticipant('${p.id}')">Eliminar</button>
-                    </td>
-                `;
-            });
-        } else {
-            const row = tbody.insertRow();
-            row.innerHTML = '<td colspan="4" style="text-align: center; padding: 20px;">No hay participantes creados aún</td>';
-        }
-
-        // Llenar select de calificación
-        const select = document.getElementById('gradePractitioner');
-        if (select) {
-            select.innerHTML = '<option value="">-- Selecciona un participante --</option>';
-            if (data && data.length > 0) {
-                data.forEach(p => {
-                    if (!p || !p.id) return;
-                    const option = document.createElement('option');
-                    option.value = p.id;
-                    const fname = (p.first_name || 'N/A').toString().trim();
-                    const lname = (p.last_name || '').toString().trim();
-                    option.textContent = `${fname} ${lname}`;
-                    select.appendChild(option);
-                });
-            }
-        }
-    }
-
-    function openAddParticipantModal() {
-        document.getElementById('addParticipantModal').classList.add('show');
-    }
-
-    async function saveNewParticipant() {
-        const firstName = document.getElementById('participantFirstName').value;
-        const lastName = document.getElementById('participantLastName').value;
-        const username = document.getElementById('participantUsername').value;
-        const password = document.getElementById('participantPassword').value;
-        const dept = document.getElementById('participantDept').value;
-
-        if (!firstName || !lastName || !username) {
-            showError('participantError', 'Completa todos los campos requeridos');
-            return;
-        }
-
-        const pwd = password || generatePassword();
-
-        // Crear user
-        const { data: newUser, error: userError } = await supabase
-            .from('users')
-            .insert({
-                email: `${username}@impulsa.local`,
-                password_hash: btoa(pwd),
-                full_name: `${firstName} ${lastName}`,
-                role: 'practicante',
-                is_active: true
-            })
-            .select()
-            .single();
-
-        if (userError) {
-            showError('participantError', 'Error al crear usuario');
-            return;
-        }
-
-        // Crear practitioner
-        const { error: practError } = await supabase
-            .from('practitioners')
-            .insert({
-                user_id: newUser.id,
-                first_name: firstName,
-                last_name: lastName,
-                username: username,
-                email: `${username}@impulsa.local`,
-                department: dept,
-                is_active: true
-            });
-
-        if (practError) {
-            showError('participantError', 'Error al crear participante');
-            return;
-        }
-
-        showSuccess('participantSuccess', `Participante creado - Contraseña: ${pwd}`);
-        setTimeout(() => {
-            document.getElementById('addParticipantModal').classList.remove('show');
-            document.getElementById('participantFirstName').value = '';
-            document.getElementById('participantLastName').value = '';
-            document.getElementById('participantUsername').value = '';
-            document.getElementById('participantPassword').value = '';
-            document.getElementById('participantDept').value = '';
-            loadPractitioners();
-        }, 2000);
-    }
-
-    async function editParticipant(participantId) {
-        const { data: participant, error } = await supabase
-            .from('practitioners')
-            .select('*')
-            .eq('id', participantId)
-            .single();
-
-        if (error) {
-            console.error(error);
-            return;
-        }
-
-        document.getElementById('editParticipantId').value = participantId;
-        document.getElementById('editParticipantName').textContent = `${participant.first_name} ${participant.last_name}`;
-        document.getElementById('editParticipantUsername').textContent = participant.username;
-        document.getElementById('currentPasswordDisplay').textContent = '••••••••';
-        document.getElementById('editParticipantPassword').value = '';
-        document.getElementById('statusActive').checked = participant.is_active;
-        document.getElementById('statusInactive').checked = !participant.is_active;
-
-        document.getElementById('editParticipantModal').classList.add('show');
-    }
-
-    async function saveEditParticipant() {
-        const id = document.getElementById('editParticipantId').value;
-        const newPassword = document.getElementById('editParticipantPassword').value;
-        const isActive = document.getElementById('statusActive').checked;
-
-        const updates = {
-            is_active: isActive,
-            updated_at: new Date().toISOString()
-        };
-
-        if (newPassword) {
-            updates.password_hash = btoa(newPassword);
-        }
-
-        const { error } = await supabase
-            .from('practitioners')
-            .update(updates)
-            .eq('id', id);
-
-        if (error) {
-            showError('editError', 'Error al guardar cambios');
-            return;
-        }
-
-        showSuccess('editSuccess', 'Participante actualizado');
-        setTimeout(() => {
-            document.getElementById('editParticipantModal').classList.remove('show');
-            loadPractitioners();
-        }, 1500);
-    }
-
-    async function deleteParticipant(participantId) {
-        if (!confirm('¿Estás seguro? Esta acción no se puede deshacer.')) return;
-
-        const { error } = await supabase
-            .from('practitioners')
-            .delete()
-            .eq('id', participantId);
-
-        if (error) {
-            alert('Error al eliminar');
-            return;
-        }
-
-        loadPractitioners();
-    }
-
-    async function changeAdminPassword() {
-        const current = document.getElementById('currentPassword').value;
-        const newPwd = document.getElementById('newPassword').value;
-        const confirm = document.getElementById('confirmPassword').value;
-
-        if (!current || !newPwd || !confirm) {
-            alert('Completa todos los campos');
-            return;
-        }
-
-        if (newPwd !== confirm) {
-            alert('Las contraseñas no coinciden');
-            return;
-        }
-
-        // Validar contraseña actual
-        if (!validatePassword(current, currentUser.password_hash)) {
-            alert('Contraseña actual incorrecta');
-            return;
-        }
-
-        // Actualizar
-        const { error } = await supabase
-            .from('users')
-            .update({ password_hash: btoa(newPwd) })
-            .eq('id', currentUser.id);
-
-        if (error) {
-            alert('Error al cambiar contraseña');
-            return;
-        }
-
-        alert('Contraseña cambiada exitosamente');
-        document.getElementById('currentPassword').value = '';
-        document.getElementById('newPassword').value = '';
-        document.getElementById('confirmPassword').value = '';
-    }
-
-    // PRACTITIONER FUNCTIONS
-    async function loadPractitionerDashboard() {
-        const { data: practitioner } = await supabase
-            .from('practitioners')
-            .select('*, user_id (*)')
-            .eq('user_id', currentUser.id)
-            .single();
-
-        if (!practitioner) return;
-
-        // Cargar puntajes
-        const { data: submissions } = await supabase
-            .from('evaluation_submissions')
-            .select('*, evaluation_id (block_id (module_id))')
-            .eq('practitioner_id', practitioner.id);
-
-        let totalPoints = 0;
-        if (submissions) {
-            submissions.forEach(s => {
-                // Buscar puntuación
-            });
-        }
-
-        // Actualizar UI
-        document.getElementById('totalPointsPract').textContent = `${totalPoints} / 100`;
-        document.getElementById('progressFill').style.width = `${Math.min(totalPoints, 100)}%`;
-    }
-
-    async function loadPractitionerProfile() {
-        const { data: practitioner } = await supabase
-            .from('practitioners')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .single();
-
-        if (practitioner) {
-            document.getElementById('profileName').textContent = `${practitioner.first_name} ${practitioner.last_name}`;
-            document.getElementById('profileUsername').textContent = practitioner.username;
-            document.getElementById('profileEmail').textContent = practitioner.email || '-';
-            document.getElementById('profileDept').textContent = practitioner.department || '-';
-        }
-    }
-
-    async function changePractitionerPassword() {
-        const current = document.getElementById('practCurrentPassword').value;
-        const newPwd = document.getElementById('practNewPassword').value;
-        const confirm = document.getElementById('practConfirmPassword').value;
-
-        if (!current || !newPwd || !confirm) {
-            alert('Completa todos los campos');
-            return;
-        }
-
-        if (newPwd !== confirm) {
-            alert('Las contraseñas no coinciden');
-            return;
-        }
-
-        if (!validatePassword(current, currentUser.password_hash)) {
-            alert('Contraseña actual incorrecta');
-            return;
-        }
-
-        const { error } = await supabase
-            .from('users')
-            .update({ password_hash: btoa(newPwd) })
-            .eq('id', currentUser.id);
-
-        if (error) {
-            alert('Error al cambiar contraseña');
-            return;
-        }
-
-        alert('Contraseña cambiada exitosamente');
-        document.getElementById('practCurrentPassword').value = '';
-        document.getElementById('practNewPassword').value = '';
-        document.getElementById('practConfirmPassword').value = '';
-    }
-
-    async function loadScoresHistory() {
-        const { data: practitioner } = await supabase
-            .from('practitioners')
-            .select('*')
-            .eq('user_id', currentUser.id)
-            .single();
-
-        if (!practitioner) return;
-
-        const { data: scores } = await supabase
-            .from('evaluation_scores')
-            .select('*, submission_id (evaluation_id (name, block_id (name)))')
-            .eq('submission_id.practitioner_id', practitioner.id);
-
-        const html = scores ? scores.map(s => `
-            <div class="card" style="background: #f9f9f9; margin-bottom: 10px;">
-                <p><strong>Evaluación:</strong> ${s.submission_id?.evaluation_id?.name || '-'}</p>
-                <p><strong>Bloque:</strong> ${s.submission_id?.evaluation_id?.block_id?.name || '-'}</p>
-                <p><strong>Calificación:</strong> ${s.score} puntos</p>
-                <p><strong>Fecha:</strong> ${new Date(s.rated_at).toLocaleDateString()}</p>
-                ${s.feedback ? `<p><strong>Comentarios:</strong> ${s.feedback}</p>` : ''}
-            </div>
-        `).join('') : '<p>Sin calificaciones aún</p>';
-
-        document.getElementById('scoresHistoryContainer').innerHTML = html || '<p>Sin calificaciones aún</p>';
-    }
-
-    async function loadAdminReports() {
-        const { data: practitioners } = await supabase
-            .from('practitioners')
-            .select('*')
-            .eq('is_active', true);
-
-        let html = '';
-        if (practitioners) {
-            for (const p of practitioners) {
-                const { data: scores } = await supabase
-                    .from('evaluation_scores')
-                    .select('*')
-                    .eq('submission_id.practitioner_id', p.id);
-
-                const totalPoints = scores ? scores.reduce((sum, s) => sum + parseFloat(s.score || 0), 0) : 0;
-                const fname = (p.first_name || 'N/A').toString().trim();
-                const lname = (p.last_name || '').toString().trim();
-                const uname = (p.username || 'N/A').toString().trim();
-
-                html += `
-                    <div class="card" style="background: #f9f9f9; margin-bottom: 15px;">
-                        <h4>${fname} ${lname}</h4>
-                        <p><strong>Usuario:</strong> ${uname}</p>
-                        <p><strong>Total Puntos:</strong> ${totalPoints} / 100</p>
-                        <p><strong>Evaluaciones Completadas:</strong> ${scores?.length || 0}</p>
-                    </div>
-                `;
-            }
-        }
-
-        document.getElementById('reportsContainer').innerHTML = html || '<p>Sin datos</p>';
-    }
-
-    // UTILITY FUNCTIONS
-    function generatePassword() {
-        try {
-            const pwd = Math.random().toString(36).slice(-8);
-            return pwd ? pwd.toUpperCase() : 'Pass123456';
         } catch (e) {
-            return 'Pass' + Math.random().toString().slice(2, 8);
-        }
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).classList.remove('show');
-    }
-
-    function showError(elementId, message) {
-        const el = document.getElementById(elementId);
-        el.textContent = message;
-        el.classList.add('show');
-    }
-
-    function showSuccess(elementId, message) {
-        const el = document.getElementById(elementId);
-        el.textContent = message;
-        el.classList.add('show');
-    }
-
-    function copyPassword() {
-        const pwd = document.getElementById('currentPasswordDisplay').textContent;
-        if (pwd !== '••••••••') {
-            navigator.clipboard.writeText(pwd);
-            alert('Contraseña copiada al portapapeles');
+            console.error('Error login:', e);
+            mostrarError('Error: ' + e.message);
         }
     }
 
     // LOGOUT
-    function logoutUser() {
-        if (confirm('¿Deseas cerrar sesión?')) {
-            currentUser = null;
-            localStorage.removeItem('currentUser');
-            document.getElementById('mainApp').style.display = 'none';
-            document.getElementById('loginPage').style.display = 'flex';
-            document.getElementById('loginEmail').value = '';
-            document.getElementById('loginPassword').value = '';
+    function hacerLogout() {
+        if (confirm('¿Salir?')) {
+            usuarioActual = null;
+            localStorage.removeItem('user');
+            location.reload();
         }
+    }
+
+    // MOSTRAR ERROR
+    function mostrarError(msg) {
+        const el = document.getElementById('errorMsg');
+        el.textContent = msg;
+        el.classList.add('show');
+        setTimeout(() => el.classList.remove('show'), 5000);
+    }
+
+    // MOSTRAR APP
+    async function mostrarApp() {
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('appPage').style.display = 'flex';
+
+        document.getElementById('usuario').textContent = usuarioActual.full_name || 'Usuario';
+
+        if (usuarioActual.role === 'admin') {
+            document.getElementById('adminMenu').style.display = 'block';
+            document.getElementById('practMenu').style.display = 'none';
+            await cargarDashboardAdmin();
+            irSeccion('dashboard');
+        } else {
+            document.getElementById('adminMenu').style.display = 'none';
+            document.getElementById('practMenu').style.display = 'block';
+            irSeccion('misevaluaciones');
+        }
+    }
+
+    // CARGAR DATOS ADMIN
+    async function cargarDashboardAdmin() {
+        try {
+            const { data: pract } = await db.from('practitioners').select('*');
+            const { data: mods } = await db.from('modules').select('*');
+            const { data: blocks } = await db.from('blocks').select('*').eq('is_published', true);
+
+            document.getElementById('totalPract').textContent = pract?.length || 0;
+            document.getElementById('totalMod').textContent = mods?.length || 0;
+            document.getElementById('totalBlq').textContent = blocks?.length || 0;
+
+            await cargarParticipantes();
+            await cargarModulos();
+        } catch (e) {
+            console.error('Error cargando dashboard:', e);
+        }
+    }
+
+    // CARGAR PARTICIPANTES
+    async function cargarParticipantes() {
+        try {
+            const { data } = await db.from('practitioners').select('*').order('first_name');
+            const tbody = document.querySelector('#tablaPract tbody');
+            tbody.innerHTML = '';
+
+            if (data && data.length > 0) {
+                data.forEach(p => {
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>${p.first_name} ${p.last_name}</td>
+                        <td>${p.username}</td>
+                        <td><span class="badge ${p.is_active ? 'badge-active' : 'badge-inactive'}">${p.is_active ? '✅ Activo' : '❌ Inactivo'}</span></td>
+                        <td><button class="btn-small" onclick="editarPract('${p.id}')">Editar</button></td>
+                    `;
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px;">Sin participantes</td></tr>';
+            }
+        } catch (e) {
+            console.error('Error cargando participantes:', e);
+        }
+    }
+
+    // CARGAR MODULOS
+    async function cargarModulos() {
+        try {
+            const { data } = await db.from('modules').select('*').order('order_number');
+            const div = document.getElementById('listaModulos');
+            div.innerHTML = '';
+
+            if (data) {
+                data.forEach(m => {
+                    div.innerHTML += `<div style="margin-bottom: 15px; padding: 15px; background: #f9f9f9; border-radius: 5px;">
+                        <strong>${m.name}</strong><br>
+                        <small>Puntos: ${m.total_points}</small>
+                    </div>`;
+                });
+            }
+        } catch (e) {
+            console.error('Error cargando módulos:', e);
+        }
+    }
+
+    // NAVEGAR SECCIONES
+    function irSeccion(seccion) {
+        document.querySelectorAll('[id$=""]').forEach(el => {
+            if (['dashboard', 'participantes', 'modulos', 'misevaluaciones', 'perfil'].includes(el.id)) {
+                el.style.display = 'none';
+            }
+        });
+        
+        const seccionEL = document.getElementById(seccion);
+        if (seccionEL) seccionEL.style.display = 'block';
+
+        const titulos = {
+            'dashboard': 'Dashboard',
+            'participantes': 'Participantes',
+            'modulos': 'Módulos y Bloques',
+            'misevaluaciones': 'Mis Evaluaciones',
+            'perfil': 'Mi Perfil'
+        };
+        document.getElementById('titulo').textContent = titulos[seccion] || 'Portal';
+    }
+
+    // PLACEHOLDER FUNCIONES
+    function abrirAgregarPract() {
+        alert('Agregar participante (en desarrollo)');
+    }
+
+    function editarPract(id) {
+        alert('Editar participante ' + id + ' (en desarrollo)');
     }
 
     // INIT
     window.addEventListener('load', () => {
-        const saved = localStorage.getItem('currentUser');
+        if (!initDB()) return;
+
+        const saved = localStorage.getItem('user');
         if (saved) {
-            currentUser = JSON.parse(saved);
-            showApp();
+            usuarioActual = JSON.parse(saved);
+            mostrarApp();
         }
-
-        // Cargar participantes para admin
-        if (currentUser?.role === 'admin') {
-            loadPractitioners();
-        }
-    });
-
-    // Cerrar modal al hacer click fuera
-    document.addEventListener('click', (e) => {
-        const modals = document.querySelectorAll('.modal.show');
-        modals.forEach(modal => {
-            if (e.target === modal) {
-                modal.classList.remove('show');
-            }
-        });
     });
 </script>
 
