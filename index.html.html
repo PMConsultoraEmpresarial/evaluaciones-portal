@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Administrador - Evaluaciones</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #F3F4F6;
+            color: #1F2937;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            background: #1F2937;
+            padding: 16px;
+            border-right: 1px solid #E5E7EB;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar-title {
+            font-weight: 600;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 24px;
+        }
+
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .sidebar-btn {
+            background: transparent;
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 6px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .sidebar-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-btn.active {
+            background: #2563EB;
+        }
+
+        /* MAIN CONTENT */
+        .main {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        .header {
+            background: white;
+            padding: 16px 32px;
+            border-bottom: 1px solid #E5E7EB;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1F2937;
+        }
+
+        .header-user {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .header-user span {
+            font-size: 14px;
+            color: #6B7280;
+        }
+
+        .header-user button {
+            background: transparent;
+            border: none;
+            color: #EF4444;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* CONTENT */
+        .content {
+            padding: 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* GRID LAYOUT */
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #E5E7EB;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #6B7280;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: 600;
+        }
+
+        /* CARD GRID */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #E5E7EB;
+            cursor: pointer;
+            transition: box-shadow 0.2s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1F2937;
+            margin-bottom: 8px;
+        }
+
+        .card-description {
+            font-size: 13px;
+            color: #6B7280;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            min-height: 40px;
+        }
+
+        .card-meta {
+            font-size: 12px;
+            color: #6B7280;
+            margin-bottom: 8px;
+        }
+
+        .card-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: #2563EB;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: white;
+            border: 1px solid #D1D5DB;
+            color: #1F2937;
+            flex: 1;
+        }
+
+        .btn-secondary:hover {
+            background: #F3F4F6;
+        }
+
+        .btn-tertiary {
+            background: transparent;
+            border: none;
+            color: #2563EB;
+            padding: 6px 12px;
+        }
+
+        /* TABLE */
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #E5E7EB;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            font-size: 14px;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #F3F4F6;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #6B7280;
+            font-size: 12px;
+        }
+
+        td {
+            padding: 12px 16px;
+            color: #1F2937;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        tbody tr:hover {
+            background: #F9FAFB;
+        }
+
+        /* BADGE */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .badge-success {
+            background: #DCFCE7;
+            color: #166534;
+        }
+
+        .badge-warning {
+            background: #FEF3C7;
+            color: #92400e;
+        }
+
+        .badge-gray {
+            background: #F3F4F6;
+            color: #6B7280;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 32px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1F2937;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6B7280;
+        }
+
+        .checkbox-group {
+            border: 1px solid #E5E7EB;
+            border-radius: 6px;
+            padding: 12px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .checkbox-item {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #F3F4F6;
+        }
+
+        .checkbox-item:last-child {
+            border-bottom: none;
+        }
+
+        .checkbox-item input {
+            cursor: pointer;
+            width: auto;
+        }
+
+        .checkbox-label {
+            font-size: 14px;
+            color: #1F2937;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .checkbox-meta {
+            font-size: 12px;
+            color: #6B7280;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1F2937;
+            margin: 0;
+        }
+
+        .eval-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 4px;
+        }
+
+        .eval-badge-tecnica {
+            background: #DBEAFE;
+            color: #0c2d5c;
+        }
+
+        .eval-badge-competencias {
+            background: #FEE2E4;
+            color: #9f1239;
+        }
+
+        .eval-badge-comercial {
+            background: #F0FDF4;
+            color: #15803d;
+        }
+
+        .eval-badge-administrativa {
+            background: #FEF3C7;
+            color: #78350f;
+        }
+
+        .eval-badge-liderazgo {
+            background: #E9D5FF;
+            color: #6b21a8;
+        }
+
+        .eval-badge-procesos {
+            background: #CCFBF1;
+            color: #134e4a;
+        }
+
+        .search-box {
+            margin-bottom: 24px;
+        }
+
+        .search-box input {
+            width: 300px;
+            padding: 10px 12px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+        }
+
+        .info-box {
+            background: #F0F9FF;
+            border: 1px solid #BFDBFE;
+            border-left: 3px solid #2563EB;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            color: #1e40af;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6B7280;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .button-group .btn {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <div class="sidebar-title">Portal Admin</div>
+        <div class="sidebar-menu">
+            <button class="sidebar-btn active" onclick="switchScreen('dashboard')">📊 Dashboard</button>
+            <button class="sidebar-btn" onclick="switchScreen('evaluaciones')">📋 Evaluaciones</button>
+            <button class="sidebar-btn" onclick="switchScreen('practicantes')">👥 Practicantes</button>
+            <button class="sidebar-btn" onclick="switchScreen('resultados')">📈 Resultados</button>
+            <button class="sidebar-btn" onclick="switchScreen('config')">⚙️ Configuración</button>
+        </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-title" id="pageTitle">Dashboard</div>
+            <div class="header-user">
+                <span id="userEmail">admin@empresa.com</span>
+                <button onclick="logout()">Cerrar sesión</button>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <!-- DASHBOARD SCREEN -->
+            <div id="dashboard" class="screen active">
+                <div class="metric-grid">
+                    <div class="metric-card">
+                        <div class="metric-label">Evaluaciones Activas</div>
+                        <div class="metric-value" id="metricEvals">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Practicantes Totales</div>
+                        <div class="metric-value" id="metricPracs">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Pendientes de Respuesta</div>
+                        <div class="metric-value">--</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Calificadas</div>
+                        <div class="metric-value">--</div>
+                    </div>
+                </div>
+
+                <div class="table-container" style="margin-top: 32px;">
+                    <div style="background: #F3F4F6; padding: 16px; border-bottom: 1px solid #E5E7EB;">
+                        <h3 style="margin: 0; font-size: 16px; font-weight: 600;">Evaluaciones Activas</h3>
+                    </div>
+                    <table id="dashboardTable">
+                        <thead>
+                            <tr>
+                                <th>Evaluación</th>
+                                <th>Preguntas</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboardTableBody">
+                            <tr><td colspan="3" class="loading">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- EVALUACIONES SCREEN -->
+            <div id="evaluaciones" class="screen">
+                <div class="page-header">
+                    <h2 class="page-title">Gestión de Evaluaciones</h2>
+                </div>
+
+                <div class="info-box">
+                    📋 Se muestran las evaluaciones cargadas. Cada una puede ser compartida con practicantes específicos.
+                </div>
+
+                <div class="card-grid" id="evaluacionesGrid">
+                    <div class="loading" style="grid-column: 1/-1;">Cargando evaluaciones...</div>
+                </div>
+            </div>
+
+            <!-- PRACTICANTES SCREEN -->
+            <div id="practicantes" class="screen">
+                <div class="page-header">
+                    <h2 class="page-title">Seguimiento de Practicantes</h2>
+                </div>
+
+                <div class="search-box">
+                    <input type="text" placeholder="Buscar practicante por nombre..." onkeyup="filterTable(this.value)">
+                </div>
+
+                <div class="table-container">
+                    <table id="practitionersTable">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th style="text-align: center;">Departamento</th>
+                                <th style="text-align: center;">Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="practitionersBody">
+                            <tr><td colspan="5" class="loading">Cargando practicantes...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- RESULTADOS SCREEN -->
+            <div id="resultados" class="screen">
+                <div class="page-header">
+                    <h2 class="page-title">Resultados de Evaluaciones</h2>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Practicante</th>
+                                <th>Evaluación</th>
+                                <th style="text-align: center;">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultadosBody">
+                            <tr><td colspan="3" class="loading">No hay resultados aún</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- CONFIGURACIÓN SCREEN -->
+            <div id="config" class="screen">
+                <div class="page-header">
+                    <h2 class="page-title">Gestión de Usuarios</h2>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th style="text-align: center;">Rol</th>
+                                <th style="text-align: center;">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersBody">
+                            <tr><td colspan="4" class="loading">Cargando usuarios...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- SHARE MODAL -->
+<div id="shareModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title" id="shareTitle">Compartir: Evaluación</h2>
+            <button class="modal-close" onclick="closeModal('share')">×</button>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="font-size: 13px; color: #6B7280; display: block; margin-bottom: 6px; font-weight: 500;">Seleccionar practicantes</label>
+            <div class="checkbox-group" id="checkboxGroup">
+                <div class="loading">Cargando practicantes...</div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 12px;">
+            <button class="btn btn-secondary" onclick="closeModal('share')" style="flex: 1;">Cancelar</button>
+            <button class="btn btn-primary" onclick="assignEval()" style="flex: 1;">Asignar Evaluación</button>
+        </div>
+    </div>
+</div>
+
+<!-- SUPABASE CONFIG - INCLUIDO AQUÍ DIRECTAMENTE -->
+<script>
+console.log('===== INICIANDO PORTAL =====');
+
+// ========== SUPABASE CONFIG ==========
+const SUPABASE_URL = 'https://prxsoggagrcbhaugyxnx.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InByeHNvZ2dhZ3JjYmhhdWd5eG54Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk5NzMzMDksImV4cCI6MjEwMTU0OTMwOX0.S0M0-N_Q_KjGuW-Gbk2_01mXgv3-3dxgTwyVf25ltBM';
+
+console.log('✓ Config Supabase cargada');
+
+// ========== GET EVALUATIONS ==========
+async function getEvaluations() {
+  console.log('→ Obteniendo evaluaciones...');
+  try {
+    const url = `${SUPABASE_URL}/rest/v1/evaluations?order=created_at.desc`;
+    const response = await fetch(url, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    
+    const data = await response.json();
+    console.log('✓ Evaluaciones cargadas:', data.length);
+    return data;
+  } catch (error) {
+    console.error('✗ Error:', error);
+    alert('Error al cargar evaluaciones: ' + error.message);
+    return [];
+  }
+}
+
+// ========== GET PRACTITIONERS ==========
+async function getPractitioners() {
+  console.log('→ Obteniendo practicantes...');
+  try {
+    const url = `${SUPABASE_URL}/rest/v1/practitioners?order=first_name.asc`;
+    const response = await fetch(url, {
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    
+    const data = await response.json();
+    console.log('✓ Practicantes cargados:', data.length);
+    return data;
+  } catch (error) {
+    console.error('✗ Error:', error);
+    alert('Error al cargar practicantes: ' + error.message);
+    return [];
+  }
+}
+
+// ========== ASSIGN EVALUATION ==========
+async function assignEvaluation(evaluationId, practitionerIds) {
+  console.log('→ Asignando evaluación...');
+  try {
+    const assignments = practitionerIds.map(pid => ({
+      evaluation_id: evaluationId,
+      practitioner_id: pid,
+      status: 'assigned'
+    }));
+    
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/evaluation_assignments`,
+      {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(assignments)
+      }
+    );
+    
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    console.log('✓ Evaluación asignada');
+    return true;
+  } catch (error) {
+    console.error('✗ Error:', error);
+    alert('Error: ' + error.message);
+    return false;
+  }
+}
+
+// ========== VARIABLES GLOBALES ==========
+let allEvaluations = [];
+let allPractitioners = [];
+let currentShareEvalId = '';
+
+// ========== INICIALIZAR ==========
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('📄 DOM cargado');
+  console.log('→ Cargando datos...');
+  
+  allEvaluations = await getEvaluations();
+  allPractitioners = await getPractitioners();
+  
+  console.log('→ Renderizando...');
+  renderDashboard();
+  console.log('✓ Listo!');
+});
+
+// ========== RENDER DASHBOARD ==========
+function renderDashboard() {
+  document.getElementById('metricEvals').textContent = allEvaluations.length;
+  document.getElementById('metricPracs').textContent = allPractitioners.length;
+
+  const tbody = document.getElementById('dashboardTableBody');
+  if (allEvaluations.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="3" class="loading">No hay evaluaciones</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = allEvaluations.map(e => `
+    <tr>
+      <td><span class="eval-badge eval-badge-${e.type}">${e.type.toUpperCase()}</span> ${e.name}</td>
+      <td>${e.total_questions} preguntas</td>
+      <td><span class="badge badge-success">Activa</span></td>
+    </tr>
+  `).join('');
+}
+
+// ========== SWITCH SCREEN ==========
+function switchScreen(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+
+  document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  const titles = {
+    'dashboard': 'Dashboard',
+    'evaluaciones': 'Gestión de Evaluaciones',
+    'practicantes': 'Seguimiento de Practicantes',
+    'resultados': 'Resultados de Evaluaciones',
+    'config': 'Gestión de Usuarios'
+  };
+
+  document.getElementById('pageTitle').textContent = titles[screenId] || 'Dashboard';
+
+  if (screenId === 'evaluaciones') renderEvaluaciones();
+  else if (screenId === 'practicantes') renderPracticantes();
+  else if (screenId === 'config') renderUsers();
+}
+
+// ========== RENDER EVALUACIONES ==========
+function renderEvaluaciones() {
+  const grid = document.getElementById('evaluacionesGrid');
+  
+  if (allEvaluations.length === 0) {
+    grid.innerHTML = '<div class="loading" style="grid-column: 1/-1;">No hay evaluaciones</div>';
+    return;
+  }
+
+  grid.innerHTML = allEvaluations.map(e => `
+    <div class="card">
+      <div class="card-title">✔ <span class="eval-badge eval-badge-${e.type}">${e.type.toUpperCase()}</span></div>
+      <div class="card-title" style="font-size: 16px; margin-bottom: 8px;">${e.name}</div>
+      <p class="card-description">${e.description}</p>
+      <div class="card-meta">📌 Preguntas: ${e.total_questions}</div>
+      <div class="card-meta">📅 Creada: ${new Date(e.created_at).toLocaleDateString('es-ES')}</div>
+      <div class="card-buttons">
+        <button class="btn btn-secondary">Editar</button>
+        <button class="btn btn-secondary" onclick="openShareModal('${e.id}', '${e.name}')">Compartir</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ========== RENDER PRACTICANTES ==========
+function renderPracticantes() {
+  const tbody = document.getElementById('practitionersBody');
+  
+  if (allPractitioners.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="loading">No hay practicantes</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = allPractitioners.map(p => `
+    <tr>
+      <td>${p.first_name} ${p.last_name}</td>
+      <td>${p.email}</td>
+      <td style="text-align: center;">${p.department || '-'}</td>
+      <td style="text-align: center;"><span class="badge badge-success">Activo</span></td>
+      <td>
+        <button class="btn btn-tertiary">Calificar</button>
+        <button class="btn btn-tertiary">Ver respuestas</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+// ========== RENDER USERS ==========
+function renderUsers() {
+  document.getElementById('usersBody').innerHTML = `
+    <tr>
+      <td>Administrador Portal</td>
+      <td>admin@empresa.com</td>
+      <td style="text-align: center;">admin</td>
+      <td style="text-align: center;"><span class="badge badge-success">Activo</span></td>
+    </tr>
+  `;
+}
+
+// ========== SHARE MODAL ==========
+function openShareModal(evalId, evalName) {
+  currentShareEvalId = evalId;
+  document.getElementById('shareTitle').textContent = `Compartir: ${evalName}`;
+  
+  const checkboxGroup = document.getElementById('checkboxGroup');
+  if (allPractitioners.length === 0) {
+    checkboxGroup.innerHTML = '<div class="loading">No hay practicantes</div>';
+    return;
+  }
+
+  checkboxGroup.innerHTML = allPractitioners.map((p, i) => `
+    <div class="checkbox-item">
+      <input type="checkbox" id="chk${i}" value="${p.id}">
+      <label for="chk${i}" class="checkbox-label">${p.first_name} ${p.last_name}</label>
+      <span class="checkbox-meta">(${p.email})</span>
+    </div>
+  `).join('');
+
+  document.getElementById('shareModal').classList.add('active');
+}
+
+function closeModal(name) {
+  document.getElementById(name + 'Modal').classList.remove('active');
+}
+
+async function assignEval() {
+  const checked = Array.from(document.querySelectorAll('#checkboxGroup input:checked')).map(el => el.value);
+  
+  if (checked.length === 0) {
+    alert('⚠ Selecciona al menos 1 practicante');
+    return;
+  }
+
+  const success = await assignEvaluation(currentShareEvalId, checked);
+  if (success) {
+    closeModal('share');
+    alert('✓ Evaluación asignada correctamente');
+    allEvaluations = await getEvaluations();
+  }
+}
+
+// ========== FILTER TABLE ==========
+function filterTable(value) {
+  const rows = document.querySelectorAll('#practitionersBody tr');
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(value.toLowerCase()) ? '' : 'none';
+  });
+}
+
+// ========== LOGOUT ==========
+function logout() {
+  if (confirm('¿Cerrar sesión?')) {
+    alert('Sesión cerrada');
+    location.reload();
+  }
+}
+
+console.log('✓ Scripts cargados');
+</script>
+
+</body>
+</html>
