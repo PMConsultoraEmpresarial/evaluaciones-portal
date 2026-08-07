@@ -1435,7 +1435,9 @@
         const titles = { dash: 'Dashboard', pract: 'Participantes', mods: 'Módulos', eval: 'Mis Evaluaciones', prof: 'Mi Perfil', grade: 'Calificaciones', config: 'Configuración' };
         document.getElementById('pageTitle').textContent = titles[id] || 'Portal';
         
-        if (id === 'config') {
+        if (id === 'pract') {
+            loadPractTable();
+        } else if (id === 'config') {
             loadConfig();
         } else if (id === 'eval') {
             loadEvals();
