@@ -1187,7 +1187,7 @@
             const { data: insertData, error: insertError } = await db.from('activity_responses').upsert({
                 participant_id: practData.id,
                 activity_id: activityId,
-                pdf_url: publicUrl
+                file_url: publicUrl
             });
             
             console.log('DB Insert Result:', { insertData, insertError });
