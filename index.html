@@ -981,8 +981,12 @@
             const { data: blocks } = await db.from('blocks').select('*').in('id', blockIds).order('module_id');
             console.log('📦 Blocks:', blocks);
             
-            const { data: activities } = await db.from('activities').select('*').in('block_id', blockIds).order('block_id, activity_number');
-            console.log('✏️ Activities:', activities);
+            const { data: allActivities, error: activitiesError } = await db.from('activities').select('*').order('block_id,activity_number');
+            console.log('✏️ All Activities (sin filtro):', allActivities);
+            console.log('⚠️ Activities Error:', activitiesError);
+            
+            const activities = allActivities?.filter(a => blockIds.includes(a.block_id)) || [];
+            console.log('✏️ Activities (filtradas):', activities);
             
             const { data: mods } = await db.from('modules').select('*').order('order_number');
             console.log('📚 Modules:', mods);
@@ -1069,31 +1073,57 @@
     
     async function uploadActivityPdf(activityId, file, activityName) {
         try {
-            const { data: practData } = await db.from('practitioners').select('id').eq('user_id', currentUser.id).single();
-            const fileName = `${practData.id}_activity_${activityId}_${Date.now()}.pdf`;
+            console.log('📤 Iniciando upload para activity:', activityId);
             
+            const { data: practData } = await db.from('practitioners').select('id').eq('user_id', currentUser.id).single();
+            console.log('👤 Practitioner ID:', practData.id);
+            
+            const fileName = `response_${practData.id}_act_${activityId}_${Date.now()}.pdf`;
+            console.log('📄 Nombre archivo:', fileName);
+            
+            console.log('⬆️ Subiendo a Storage...');
             const { data, error } = await db.storage
                 .from('evaluation-responses')
-                .upload(`pdfs/${fileName}`, file, { upsert: true });
+                .upload(fileName, file, { 
+                    upsert: true,
+                    contentType: 'application/pdf'
+                });
+            
+            console.log('Storage Upload Result:', { data, error });
             
             if (error) {
+                console.error('❌ Error Storage:', error);
                 alert('Error subiendo archivo: ' + error.message);
                 return;
             }
             
+            console.log('✅ Storage upload exitoso');
+            
             const { data: { publicUrl } } = db.storage
                 .from('evaluation-responses')
-                .getPublicUrl(`pdfs/${fileName}`);
+                .getPublicUrl(fileName);
             
-            await db.from('activity_responses').upsert({
+            console.log('🔗 Public URL:', publicUrl);
+            console.log('💾 Guardando en activity_responses...');
+            
+            const { data: insertData, error: insertError } = await db.from('activity_responses').upsert({
                 participant_id: practData.id,
                 activity_id: activityId,
                 pdf_url: publicUrl
             });
             
+            console.log('DB Insert Result:', { insertData, insertError });
+            
+            if (insertError) {
+                console.error('❌ Error DB:', insertError);
+                alert('Error guardando: ' + insertError.message);
+                return;
+            }
+            
             alert(`✅ PDF subido correctamente!\n\nActividad: ${activityName}`);
             await loadEvals();
         } catch (e) {
+            console.error('💥 Error general:', e);
             alert('Error: ' + e.message);
         }
     }
