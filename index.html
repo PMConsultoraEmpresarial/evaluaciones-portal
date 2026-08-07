@@ -173,15 +173,9 @@
             
             <div id="pract" class="section">
                 <div class="card">
-                    <h3>Participantes</h3>
-                    <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
-                        <button class="btn" onclick="createPractitioner()">
-                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
-                            Agregar Participante
-                        </button>
-                        <input type="text" id="searchPract" placeholder="🔍 Buscar..." style="flex: 1; padding: 10px 14px; border: 1.5px solid #E5E5E5; border-radius: 8px;" onkeyup="filterPractTable()">
-                    </div>
-                    <table><thead><tr><th>Nombre</th><th>Usuario</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="practTable"></tbody></table>
+                    <h3>Evaluaciones - Participantes</h3>
+                    <p style="color: #777; font-size: 0.9em; margin-bottom: 15px;">Haz clic en un participante para ver y calificar sus evaluaciones</p>
+                    <div id="practTable"></div>
                 </div>
             </div>
             
@@ -357,73 +351,100 @@
     
     async function loadPractTable() {
         try {
-            const { data } = await db.from('practitioners').select('*').order('first_name');
-            allPractitioners = data || [];
-            renderPractTable(allPractitioners);
+            const { data: practs } = await db.from('practitioners').select('*').where('is_active', 'eq', true).order('first_name');
+            const { data: assignments } = await db.from('participant_assignments').select('participant_id, block_id');
+            const { data: blocks } = await db.from('blocks').select('*');
+            const { data: activities } = await db.from('activities').select('*');
+            const { data: responses } = await db.from('activity_responses').select('*');
+            const { data: grades } = await db.from('activity_grades').select('*');
+            
+            const div = document.getElementById('practTable')?.parentElement || document.getElementById('pract');
+            let html = '';
+            
+            if (practs?.length && assignments?.length) {
+                practs.forEach(p => {
+                    const practAssignments = assignments.filter(a => a.participant_id === p.id);
+                    const uniqueId = `pract-eval-${p.id}`;
+                    
+                    // Renderizar dropdown del participante
+                    html += `
+                    <div style="background: #F5F5FA; border-radius: 8px; margin-bottom: 12px; overflow: hidden;">
+                        <div style="padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="togglePractDropdown('${uniqueId}')">
+                            <div>
+                                <strong style="font-size: 1.05em;">${p.first_name} ${p.last_name}</strong>
+                                <span style="color: #777; font-size: 0.9em; margin-left: 10px;">${p.username}</span>
+                            </div>
+                            <span style="color: #404469; font-weight: 600; font-size: 1.2em;" id="arrow-${uniqueId}">▶</span>
+                        </div>
+                        <div id="${uniqueId}" style="display: none; background: white; border-top: 1px solid #E5E5EA;">
+                    `;
+                    
+                    // Listar evaluaciones del participante
+                    practAssignments.forEach(a => {
+                        const block = blocks.find(b => b.id === a.block_id);
+                        const blockActivities = activities.filter(act => act.block_id === a.block_id);
+                        
+                        blockActivities.forEach(act => {
+                            const response = responses?.find(r => r.participant_id === p.id && r.activity_id === act.id);
+                            const grade = grades?.find(g => g.participant_id === p.id && g.activity_id === act.id);
+                            
+                            const hasResponse = !!response;
+                            const isGraded = !!grade;
+                            
+                            html += `
+                            <div style="padding: 12px 15px; border-bottom: 1px solid #F0F0F0;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <div>
+                                        <strong>${block.name}</strong><br>
+                                        <span style="color: #777; font-size: 0.85em;">${act.activity_name}</span>
+                                    </div>
+                                    <span style="background: ${isGraded ? '#D1FAE5' : '#FEE2E2'}; color: ${isGraded ? '#065F46' : '#991B1B'}; padding: 4px 8px; border-radius: 4px; font-size: 0.75em; font-weight: 600;">
+                                        ${isGraded ? '✅ Calificado' : '⏳ Pendiente'}
+                                    </span>
+                                </div>
+                                <div style="display: flex; gap: 8px;">
+                                    ${hasResponse ? `<button class="btn" style="background: #3B82F6; padding: 6px 12px; font-size: 0.8em; flex: 1;" onclick="window.open('${response.file_url}', '_blank')">
+                                        📄 Ver PDF
+                                    </button>` : `<button class="btn" style="background: #999; padding: 6px 12px; font-size: 0.8em; flex: 1; cursor: not-allowed;" disabled>Sin PDF</button>`}
+                                    <button class="btn" style="background: #E94D9A; padding: 6px 12px; font-size: 0.8em; flex: 1;" onclick="showGradeModal('${p.id}', ${a.block_id}, '${p.first_name} ${p.last_name}', '${block.name}', ${act.id})">
+                                        📝 Calificar
+                                    </button>
+                                </div>
+                            </div>
+                            `;
+                        });
+                    });
+                    
+                    html += `
+                        </div>
+                    </div>
+                    `;
+                });
+                
+                if (!html) {
+                    html = '<div class="empty">Sin participantes activos</div>';
+                }
+            } else {
+                html = '<div class="empty">Sin participantes activos con evaluaciones</div>';
+            }
+            
+            div.innerHTML = html;
         } catch (e) {
             console.error('Error:', e);
         }
     }
     
-    function renderPractTable(data) {
-        const tb = document.getElementById('practTable');
-        tb.innerHTML = '';
+    function togglePractDropdown(uniqueId) {
+        const container = document.getElementById(uniqueId);
+        const arrow = document.getElementById(`arrow-${uniqueId}`);
         
-        if (data?.length) {
-            // Separar activos e inactivos
-            const activos = data.filter(p => p.is_active);
-            const inactivos = data.filter(p => !p.is_active);
-            const ordenados = [...activos, ...inactivos];
-            
-            ordenados.forEach(p => {
-                const btnColor = p.is_active ? '#059669' : '#999999';
-                const btnText = p.is_active ? 'Desactivar' : 'Activar';
-                
-                let botonesHTML = `
-                    <button class="btn" style="background: ${btnColor}; padding: 6px 10px; font-size: 0.8em; margin-right: 4px;" onclick="togglePractState('${p.id}', ${!p.is_active})">
-                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
-                        ${btnText}
-                    </button>
-                    <button class="btn" style="background: #404469; padding: 6px 10px; font-size: 0.8em; margin-right: 4px;" onclick="showPractChangePasswordModal('${p.id}', '${p.username}', '${p.first_name} ${p.last_name}')">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                        Contraseña
-                    </button>`;
-                
-                // Agregar botón eliminar solo si está inactivo
-                if (!p.is_active) {
-                    botonesHTML += `<button class="btn" style="background: #DC2626; padding: 6px 10px; font-size: 0.8em;" onclick="deletePractitioner('${p.id}', '${p.first_name} ${p.last_name}')">
-                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-9l-1 1H5v2h14V4z"/></svg>
-                        Eliminar
-                    </button>`;
-                }
-                
-                tb.innerHTML += `<tr>
-                    <td><strong>${p.first_name} ${p.last_name}</strong></td>
-                    <td>${p.username}</td>
-                    <td><span class="badge ${p.is_active ? 'badge-active' : 'badge-inactive'}">${p.is_active ? 'Activo' : 'Inactivo'}</span></td>
-                    <td>${botonesHTML}</td>
-                </tr>`;
-            });
+        if (container.style.display === 'none') {
+            container.style.display = 'block';
+            arrow.textContent = '▼';
         } else {
-            tb.innerHTML = '<tr><td colspan="4" class="empty">Sin participantes</td></tr>';
+            container.style.display = 'none';
+            arrow.textContent = '▶';
         }
-    }
-    
-    function filterPractTable() {
-        const search = document.getElementById('searchPract').value.toLowerCase().trim();
-        
-        if (!search) {
-            renderPractTable(allPractitioners);
-            return;
-        }
-        
-        const filtered = allPractitioners.filter(p => 
-            p.first_name.toLowerCase().includes(search) ||
-            p.last_name.toLowerCase().includes(search) ||
-            p.username.toLowerCase().includes(search)
-        );
-        
-        renderPractTable(filtered);
     }
     
     async function togglePractState(practId, newState) {
@@ -1195,221 +1216,76 @@
             const { data: blocks } = await db.from('blocks').select('*');
             const { data: activities } = await db.from('activities').select('*');
             const { data: responses } = await db.from('activity_responses').select('*');
+            const { data: grades } = await db.from('activity_grades').select('*');
             
             const div = document.getElementById('gradeContainer');
-            
-            // Crear input de búsqueda si no existe
-            if (!document.getElementById('searchGradePract')) {
-                const searchDiv = document.createElement('div');
-                searchDiv.style.cssText = 'margin-bottom: 20px;';
-                searchDiv.innerHTML = `
-                    <input type="text" id="searchGradePract" placeholder="🔍 Buscar participante..." 
-                    style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.95em;">
-                `;
-                div.parentElement.insertBefore(searchDiv, div);
-                
-                document.getElementById('searchGradePract').addEventListener('keyup', filterGradePract);
-            }
-            
             let html = '';
             
-            if (practs?.length && assignments?.length) {
-                // Agrupar por participante
-                const practGroups = {};
+            if (practs?.length) {
+                // Calcular puntos totales por participante
+                const practScores = {};
                 
                 practs.forEach(p => {
-                    const practAssignments = assignments.filter(a => a.participant_id === p.id);
+                    const practGrades = grades?.filter(g => g.participant_id === p.id) || [];
+                    const totalPoints = practGrades.reduce((sum, g) => sum + (g.points_awarded || 0), 0);
                     
-                    if (practAssignments.length > 0) {
-                        practGroups[p.id] = {
+                    if (!practScores[p.id]) {
+                        practScores[p.id] = {
                             pract: p,
-                            evaluations: []
+                            totalPoints: 0,
+                            maxPoints: 0
                         };
-                        
-                        practAssignments.forEach(a => {
-                            const block = blocks.find(b => b.id === a.block_id);
-                            const blockActivities = activities.filter(act => act.block_id === a.block_id);
-                            const practResponses = responses.filter(r => r.participant_id === p.id && blockActivities.map(act => act.id).includes(r.activity_id));
-                            
-                            if (blockActivities.length > 0) {
-                                const isComplete = practResponses.length === blockActivities.length;
-                                practGroups[p.id].evaluations.push({
-                                    block,
-                                    blockActivities,
-                                    practResponses,
-                                    isComplete
-                                });
-                            }
+                    }
+                    
+                    practScores[p.id].totalPoints = totalPoints;
+                });
+                
+                // Calcular puntos máximos posibles
+                const allActivities = activities || [];
+                practs.forEach(p => {
+                    const practAssignments = assignments?.filter(a => a.participant_id === p.id) || [];
+                    let maxPts = 0;
+                    
+                    practAssignments.forEach(a => {
+                        const blockActivities = allActivities.filter(ac => ac.block_id === a.block_id);
+                        blockActivities.forEach(ac => {
+                            maxPts += ac.max_points || 0;
                         });
+                    });
+                    
+                    if (practScores[p.id]) {
+                        practScores[p.id].maxPoints = maxPts;
                     }
                 });
                 
-                // Renderizar como dropdowns
-                Object.keys(practGroups).forEach(practId => {
-                    const group = practGroups[practId];
-                    const pract = group.pract;
-                    const uniqueId = `grade-${practId}`;
-                    const totalComplete = group.evaluations.filter(e => e.isComplete).length;
-                    const totalEvals = group.evaluations.length;
+                // Renderizar
+                practs.forEach(p => {
+                    const score = practScores[p.id];
+                    const percentage = score.maxPoints > 0 ? Math.round((score.totalPoints / score.maxPoints) * 100) : 0;
                     
                     html += `
-                    <div style="background: #F5F5FA; border-radius: 8px; margin-bottom: 12px; overflow: hidden;">
-                        <div style="padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleGradeDropdown('${uniqueId}')">
-                            <div>
-                                <strong style="font-size: 1.05em;">${pract.first_name} ${pract.last_name}</strong>
-                                <span style="color: #777; font-size: 0.9em; margin-left: 10px;">${totalComplete}/${totalEvals} bloques completados</span>
-                            </div>
-                            <span style="color: #404469; font-weight: 600; font-size: 1.2em;" id="arrow-${uniqueId}">▶</span>
+                    <div style="background: #F5F5FA; padding: 15px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <strong style="font-size: 1.05em;">${p.first_name} ${p.last_name}</strong>
+                            <span style="color: #777; font-size: 0.9em; margin-left: 10px;">${p.username}</span>
                         </div>
-                        <div id="${uniqueId}" style="display: none; background: white; border-top: 1px solid #E5E5EA;">
-                    `;
-                    
-                    group.evaluations.forEach((eval) => {
-                        const isComplete = eval.isComplete;
-                        html += `
-                            <div style="padding: 12px 15px; border-bottom: 1px solid #F0F0F0; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="showGradeModal('${practId}', ${eval.block.id}, '${pract.first_name} ${pract.last_name}', '${eval.block.name}')">
-                                <div>
-                                    <span style="font-weight: 500;">${eval.block.name}</span><br>
-                                    <span style="color: #777; font-size: 0.85em;">${eval.practResponses.length}/${eval.blockActivities.length} actividades</span>
-                                </div>
-                                <span style="background: ${isComplete ? '#D1FAE5' : '#FEE2E2'}; color: ${isComplete ? '#065F46' : '#991B1B'}; padding: 4px 10px; border-radius: 12px; font-size: 0.8em; font-weight: 600;">
-                                    ${isComplete ? '✅' : '⏳'}
-                                </span>
+                        <div style="text-align: right;">
+                            <div style="font-size: 1.3em; font-weight: 700; color: #404469;">
+                                ${score.totalPoints}/${score.maxPoints}
                             </div>
-                        `;
-                    });
-                    
-                    html += `
+                            <div style="font-size: 0.85em; color: #777;">
+                                ${percentage}%
+                            </div>
                         </div>
                     </div>
                     `;
                 });
                 
                 if (!html) {
-                    html = '<div class="empty">Sin evaluaciones aún</div>';
+                    html = '<div class="empty">Sin participantes activos</div>';
                 }
             } else {
-                html = '<div class="empty">Sin participantes activos o asignaciones</div>';
-            }
-            
-            div.innerHTML = html;
-        } catch (e) {
-            console.error('Error:', e);
-        }
-    }
-    
-    function toggleGradeDropdown(uniqueId) {
-        const container = document.getElementById(uniqueId);
-        const arrow = document.getElementById(`arrow-${uniqueId}`);
-        
-        if (container.style.display === 'none') {
-            container.style.display = 'block';
-            arrow.textContent = '▼';
-        } else {
-            container.style.display = 'none';
-            arrow.textContent = '▶';
-        }
-    }
-    
-    async function filterGradePract() {
-        const search = document.getElementById('searchGradePract')?.value.toLowerCase().trim() || '';
-        
-        if (!search) {
-            await loadGrade();
-            return;
-        }
-        
-        try {
-            const { data: assignments } = await db.from('participant_assignments').select('participant_id, block_id');
-            const { data: practs } = await db.from('practitioners').select('*').where('is_active', 'eq', true).order('first_name');
-            const { data: blocks } = await db.from('blocks').select('*');
-            const { data: activities } = await db.from('activities').select('*');
-            const { data: responses } = await db.from('activity_responses').select('*');
-            
-            const div = document.getElementById('gradeContainer');
-            let html = '';
-            
-            const filteredPracts = practs.filter(p => 
-                p.first_name.toLowerCase().includes(search) || 
-                p.last_name.toLowerCase().includes(search) ||
-                p.username.toLowerCase().includes(search)
-            );
-            
-            if (filteredPracts?.length && assignments?.length) {
-                const practGroups = {};
-                
-                filteredPracts.forEach(p => {
-                    const practAssignments = assignments.filter(a => a.participant_id === p.id);
-                    
-                    if (practAssignments.length > 0) {
-                        practGroups[p.id] = {
-                            pract: p,
-                            evaluations: []
-                        };
-                        
-                        practAssignments.forEach(a => {
-                            const block = blocks.find(b => b.id === a.block_id);
-                            const blockActivities = activities.filter(act => act.block_id === a.block_id);
-                            const practResponses = responses.filter(r => r.participant_id === p.id && blockActivities.map(act => act.id).includes(r.activity_id));
-                            
-                            if (blockActivities.length > 0) {
-                                const isComplete = practResponses.length === blockActivities.length;
-                                practGroups[p.id].evaluations.push({
-                                    block,
-                                    blockActivities,
-                                    practResponses,
-                                    isComplete
-                                });
-                            }
-                        });
-                    }
-                });
-                
-                Object.keys(practGroups).forEach(practId => {
-                    const group = practGroups[practId];
-                    const pract = group.pract;
-                    const uniqueId = `grade-${practId}`;
-                    const totalComplete = group.evaluations.filter(e => e.isComplete).length;
-                    const totalEvals = group.evaluations.length;
-                    
-                    html += `
-                    <div style="background: #F5F5FA; border-radius: 8px; margin-bottom: 12px; overflow: hidden;">
-                        <div style="padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleGradeDropdown('${uniqueId}')">
-                            <div>
-                                <strong style="font-size: 1.05em;">${pract.first_name} ${pract.last_name}</strong>
-                                <span style="color: #777; font-size: 0.9em; margin-left: 10px;">${totalComplete}/${totalEvals} bloques completados</span>
-                            </div>
-                            <span style="color: #404469; font-weight: 600; font-size: 1.2em;" id="arrow-${uniqueId}">▶</span>
-                        </div>
-                        <div id="${uniqueId}" style="display: none; background: white; border-top: 1px solid #E5E5EA;">
-                    `;
-                    
-                    group.evaluations.forEach((eval) => {
-                        const isComplete = eval.isComplete;
-                        html += `
-                            <div style="padding: 12px 15px; border-bottom: 1px solid #F0F0F0; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="showGradeModal('${practId}', ${eval.block.id}, '${pract.first_name} ${pract.last_name}', '${eval.block.name}')">
-                                <div>
-                                    <span style="font-weight: 500;">${eval.block.name}</span><br>
-                                    <span style="color: #777; font-size: 0.85em;">${eval.practResponses.length}/${eval.blockActivities.length} actividades</span>
-                                </div>
-                                <span style="background: ${isComplete ? '#D1FAE5' : '#FEE2E2'}; color: ${isComplete ? '#065F46' : '#991B1B'}; padding: 4px 10px; border-radius: 12px; font-size: 0.8em; font-weight: 600;">
-                                    ${isComplete ? '✅' : '⏳'}
-                                </span>
-                            </div>
-                        `;
-                    });
-                    
-                    html += `
-                        </div>
-                    </div>
-                    `;
-                });
-                
-                if (!html) {
-                    html = '<div class="empty">Sin resultados para la búsqueda</div>';
-                }
-            } else {
-                html = '<div class="empty">Sin participantes activos o asignaciones</div>';
+                html = '<div class="empty">Sin participantes activos</div>';
             }
             
             div.innerHTML = html;
