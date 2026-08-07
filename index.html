@@ -140,6 +140,7 @@
             <div class="sidebarItem active" onclick="goSection('dash')">Dashboard</div>
             <div class="sidebarItem" onclick="goSection('pract')">Participantes</div>
             <div class="sidebarItem" onclick="goSection('mods')">Módulos</div>
+            <div class="sidebarItem" onclick="goSection('grade')">📊 Calificaciones</div>
             <div class="sidebarItem" onclick="goSection('config')">⚙️ Configuración</div>
         </div>
         <div id="practMenu" class="sidebarSection">
@@ -186,6 +187,13 @@
                 <div class="card">
                     <h3>Módulos y Bloques</h3>
                     <div id="modsContainer"></div>
+                </div>
+            </div>
+            
+            <div id="grade" class="section">
+                <div class="card">
+                    <h3>📊 Calificar Evaluaciones</h3>
+                    <div id="gradeContainer"></div>
                 </div>
             </div>
             
@@ -577,6 +585,7 @@
         try {
             const { data: mods } = await db.from('modules').select('*').order('order_number');
             const { data: blocks } = await db.from('blocks').select('*').order('order_number');
+            const { data: questions } = await db.from('questions').select('block_id, id').order('block_id');
             
             const div = document.getElementById('modsContainer');
             div.innerHTML = '';
@@ -589,7 +598,21 @@
                     myBlocks.forEach(b => {
                         const estado = b.is_published ? 'PUBLICADO' : 'PRIVADO';
                         const btn = b.is_published ? 'Despublicar' : 'Publicar';
-                        html += `<div class="blockItem"><div class="blockInfo"><strong>${b.name}</strong><p>Puntos: ${b.total_points}</p></div><button class="btn" style="padding: 6px 10px; font-size: 0.8em;" onclick="toggleBlock(${b.id}, ${!b.is_published})">${btn}</button></div>`;
+                        const questCount = questions?.filter(q => q.block_id === b.id).length || 0;
+                        
+                        html += `<div class="blockItem" style="flex-wrap: wrap; gap: 10px;">
+                            <div class="blockInfo" style="flex: 1; min-width: 250px;">
+                                <strong>${b.name}</strong>
+                                <p>Puntos: ${b.total_points} | Preguntas: ${questCount}</p>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn" style="padding: 6px 10px; font-size: 0.8em;" onclick="toggleBlock(${b.id}, ${!b.is_published})">${btn}</button>
+                                <button class="btn" style="padding: 6px 10px; font-size: 0.8em; background: #404469;" onclick="showCreateQuestionModal(${b.id}, '${b.name}')">
+                                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+                                    Preguntas
+                                </button>
+                            </div>
+                        </div>`;
                     });
                     
                     html += `</div>`;
@@ -607,6 +630,98 @@
             alert(pub ? '✅ Bloque publicado' : '✅ Bloque despublicado');
             await loadMods();
             await loadDash();
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    }
+    
+    async function showCreateQuestionModal(blockId, blockName) {
+        const { data: existingQuestions } = await db.from('questions').select('*').eq('block_id', blockId).order('order_number');
+        
+        const modal = document.createElement('div');
+        modal.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; overflow-y: auto;`;
+        
+        let questionsHtml = '';
+        existingQuestions?.forEach((q, idx) => {
+            questionsHtml += `<div style="background: #F5F5FA; padding: 12px; border-radius: 6px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <div><strong>${idx + 1}. ${q.question_text}</strong><p style="font-size: 0.8em; color: #777;">${q.question_type}</p></div>
+                <button class="btn" style="padding: 4px 8px; font-size: 0.75em; background: #DC2626;" onclick="deleteQuestion(${q.id}, ${blockId})">Eliminar</button>
+            </div>`;
+        });
+        
+        const modal_html = `
+            <div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); margin: 20px auto;">
+                <h3 style="margin-bottom: 20px; color: #333;">Administrar Preguntas - ${blockName}</h3>
+                
+                <div style="max-height: 300px; overflow-y: auto; margin-bottom: 20px; border: 1px solid #E5E5E5; padding: 15px; border-radius: 6px;">
+                    ${questionsHtml || '<p style="color: #999; text-align: center;">Sin preguntas aún</p>'}
+                </div>
+                
+                <div style="background: #F5F5FA; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #333;">Pregunta:</label>
+                    <textarea id="newQuestion" placeholder="Escribe la pregunta..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-family: Arial; height: 80px; resize: vertical;"></textarea>
+                    
+                    <label style="display: block; font-weight: 600; margin-top: 12px; margin-bottom: 8px; color: #333;">Tipo:</label>
+                    <select id="questionType" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        <option value="short_text">Respuesta Corta</option>
+                        <option value="long_text">Respuesta Larga</option>
+                        <option value="multiple_choice">Opción Múltiple</option>
+                    </select>
+                    
+                    <button class="btn" style="margin-top: 12px; width: 100%;" onclick="addQuestion(${blockId}, '${blockName}')">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+                        Agregar Pregunta
+                    </button>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" style="padding: 10px 20px; background: #ddd; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Cerrar</button>
+                </div>
+            </div>
+        `;
+        
+        modal.innerHTML = modal_html;
+        document.body.appendChild(modal);
+    }
+    
+    async function addQuestion(blockId, blockName) {
+        const questionText = document.getElementById('newQuestion').value.trim();
+        const questionType = document.getElementById('questionType').value;
+        
+        if (!questionText) {
+            alert('Escribe una pregunta');
+            return;
+        }
+        
+        try {
+            const { error } = await db.from('questions').insert({
+                block_id: blockId,
+                question_text: questionText,
+                question_type: questionType,
+                required: true,
+                order_number: Date.now()
+            });
+            
+            if (error) {
+                alert('Error: ' + error.message);
+                return;
+            }
+            
+            alert('✅ Pregunta agregada');
+            document.querySelector('textarea').parentElement.parentElement.parentElement.remove();
+            await showCreateQuestionModal(blockId, blockName);
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    }
+    
+    async function deleteQuestion(questionId, blockId) {
+        if (!confirm('¿Eliminar pregunta?')) return;
+        
+        try {
+            await db.from('questions').delete().eq('id', questionId);
+            alert('✅ Pregunta eliminada');
+            await loadMods();
         } catch (e) {
             alert('Error: ' + e.message);
         }
@@ -842,15 +957,13 @@
     
     async function loadEvals() {
         try {
-            // Obtener el ID del participante actual
             const { data: practData } = await db.from('practitioners').select('id').eq('user_id', currentUser.id).single();
             
             if (!practData) {
-                document.getElementById('evalContainer').innerHTML = '<div class="empty">Error cargando datos del participante</div>';
+                document.getElementById('evalContainer').innerHTML = '<div class="empty">Error cargando datos</div>';
                 return;
             }
             
-            // Obtener las asignaciones del participante
             const { data: assignments } = await db.from('participant_assignments')
                 .select('block_id')
                 .eq('participant_id', practData.id);
@@ -860,35 +973,43 @@
                 return;
             }
             
-            // Obtener bloques asignados
             const blockIds = assignments.map(a => a.block_id);
             const { data: blocks } = await db.from('blocks').select('*').in('id', blockIds).order('module_id');
+            const { data: activities } = await db.from('activities').select('*').in('block_id', blockIds).order('block_id, activity_number');
             const { data: mods } = await db.from('modules').select('*').order('order_number');
             
             const div = document.getElementById('evalContainer');
             div.innerHTML = '';
             
-            const groupedByMod = {};
-            blocks?.forEach(b => {
-                if (!groupedByMod[b.module_id]) groupedByMod[b.module_id] = [];
-                groupedByMod[b.module_id].push(b);
-            });
-            
-            Object.keys(groupedByMod).forEach(modId => {
-                const mod = mods?.find(m => m.id === parseInt(modId));
-                if (mod) {
-                    let html = `<div style="margin-bottom: 25px;"><h4 style="font-size: 1.1em; font-weight: 600; margin-bottom: 15px; color: #404469;">${mod.name}</h4>`;
-                    
-                    groupedByMod[modId].forEach(b => {
-                        html += `<div class="blockItem"><div class="blockInfo"><strong>${b.name}</strong><p>Puntos: ${b.total_points}</p></div><button class="btn" style="padding: 8px 16px; font-size: 0.85em;" onclick="startEvaluation(${b.id}, '${b.name}')">
-                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15l-5-5 1.41-1.41L12 14.17l3.59-3.59L17 12l-5 5z"/></svg>
-                            Responder
-                        </button></div>`;
-                    });
-                    
-                    html += `</div>`;
-                    div.innerHTML += html;
-                }
+            blocks?.forEach(block => {
+                const mod = mods?.find(m => m.id === block.module_id);
+                const blockActivities = activities?.filter(a => a.block_id === block.id) || [];
+                
+                let html = `<div style="margin-bottom: 30px;">
+                    <h4 style="font-size: 1.2em; font-weight: 600; margin-bottom: 10px; color: #404469;">${mod?.name} - ${block.name}</h4>
+                    <p style="color: #777; margin-bottom: 20px;">${block.description}</p>`;
+                
+                blockActivities.forEach(act => {
+                    html += `<div style="background: #F5F5FA; padding: 18px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #E94D9A;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 15px;">
+                            <div style="flex: 1;">
+                                <strong style="display: block; margin-bottom: 8px; color: #333; font-size: 1.05em;">Actividad ${act.activity_number}: ${act.activity_name}</strong>
+                                <p style="color: #666; margin-bottom: 12px; font-size: 0.95em;">${act.description}</p>
+                                ${act.drive_link ? `<a href="${act.drive_link}" target="_blank" style="color: #404469; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                                    <svg style="width: 16px; height: 16px;" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5.04-6.71l-2.75 3.54-1.3-1.54c-.3-.36-.77-.36-1.07 0l-2.97 3.83c-.3.39-.1.97.34.97h11.84c.45 0 .64-.58.34-.97L13.07 9.1c-.3-.36-.77-.36-1.07 0z"/></svg>
+                                    📥 Descargar Evaluación
+                                </a>` : ''}
+                            </div>
+                            <button class="btn" style="background: #059669; padding: 10px 16px; font-size: 0.9em; white-space: nowrap;" onclick="showUploadPdfModal(${act.id}, '${act.activity_name}', ${block.id})">
+                                <svg style="width: 14px; height: 14px; display: inline; margin-right: 5px;" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                                Subir PDF
+                            </button>
+                        </div>
+                    </div>`;
+                });
+                
+                html += `</div>`;
+                div.innerHTML += html;
             });
         } catch (e) {
             console.error('Error:', e);
@@ -896,8 +1017,262 @@
         }
     }
     
-    function startEvaluation(blockId, blockName) {
-        alert(`📝 Evaluación: ${blockName}\n\nFuncionalidad en desarrollo - próxima fase`);
+    function showUploadPdfModal(activityId, activityName, blockId) {
+        const modal = document.createElement('div');
+        modal.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;`;
+        
+        modal.innerHTML = `
+            <div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 450px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+                <h3 style="margin-bottom: 20px; color: #333;">Subir Respuesta</h3>
+                <div style="background: #F5F5FA; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <p style="margin: 0; color: #666;"><strong>Actividad:</strong> ${activityName}</p>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 10px; color: #333;">Selecciona archivo PDF:</label>
+                    <input type="file" id="pdfFile" accept=".pdf" style="display: block; width: 100%; padding: 10px; border: 2px dashed #404469; border-radius: 6px; cursor: pointer;">
+                    <p style="font-size: 0.85em; color: #777; margin-top: 8px;">Solo archivos PDF (máximo 10MB)</p>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" style="padding: 10px 20px; background: #ddd; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancelar</button>
+                    <button id="btnUploadPdf" style="padding: 10px 20px; background: #059669; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">✅ Subir</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        document.getElementById('btnUploadPdf').onclick = async function() {
+            const file = document.getElementById('pdfFile').files[0];
+            if (!file) {
+                alert('Selecciona un archivo PDF');
+                return;
+            }
+            if (file.type !== 'application/pdf') {
+                alert('Solo se aceptan archivos PDF');
+                return;
+            }
+            modal.remove();
+            await uploadActivityPdf(activityId, file, activityName);
+        };
+    }
+    
+    async function uploadActivityPdf(activityId, file, activityName) {
+        try {
+            const { data: practData } = await db.from('practitioners').select('id').eq('user_id', currentUser.id).single();
+            const fileName = `${practData.id}_activity_${activityId}_${Date.now()}.pdf`;
+            
+            const { data, error } = await db.storage
+                .from('evaluation-responses')
+                .upload(`pdfs/${fileName}`, file, { upsert: true });
+            
+            if (error) {
+                alert('Error subiendo archivo: ' + error.message);
+                return;
+            }
+            
+            const { data: { publicUrl } } = db.storage
+                .from('evaluation-responses')
+                .getPublicUrl(`pdfs/${fileName}`);
+            
+            await db.from('activity_responses').upsert({
+                participant_id: practData.id,
+                activity_id: activityId,
+                pdf_url: publicUrl
+            });
+            
+            alert(`✅ PDF subido correctamente!\n\nActividad: ${activityName}`);
+            await loadEvals();
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    }
+    
+    async function startEvaluation(blockId, blockName) {}
+    async function submitEvaluation(blockId, responses) {}
+    
+    async function loadGrade() {
+        try {
+            const { data: assignments } = await db.from('participant_assignments').select('participant_id, block_id');
+            const { data: practs } = await db.from('practitioners').select('*').order('first_name');
+            const { data: blocks } = await db.from('blocks').select('*');
+            const { data: activities } = await db.from('activities').select('*');
+            const { data: responses } = await db.from('activity_responses').select('*');
+            
+            const div = document.getElementById('gradeContainer');
+            let html = '';
+            
+            if (assignments?.length) {
+                const uniqueCombos = [...new Set(assignments.map(a => `${a.participant_id}|${a.block_id}`))];
+                
+                uniqueCombos.forEach(combo => {
+                    const [practId, blockId] = combo.split('|');
+                    const pract = practs.find(p => p.id === practId);
+                    const block = blocks.find(b => b.id === parseInt(blockId));
+                    const blockActivities = activities.filter(a => a.block_id === parseInt(blockId));
+                    const practResponses = responses.filter(r => r.participant_id === practId && blockActivities.map(a => a.id).includes(r.activity_id));
+                    
+                    if (blockActivities.length > 0) {
+                        const isComplete = practResponses.length === blockActivities.length;
+                        html += `<div style="background: #F5F5FA; padding: 15px; border-radius: 8px; margin-bottom: 15px; cursor: pointer;" onclick="showGradeModal('${practId}', ${blockId}, '${pract.first_name} ${pract.last_name}', '${block.name}')">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>${pract.first_name} ${pract.last_name}</strong><br>
+                                    <span style="color: #777; font-size: 0.9em;">${block.name} • ${practResponses.length}/${blockActivities.length} actividades respondidas</span>
+                                </div>
+                                <span style="background: ${isComplete ? '#D1FAE5' : '#FEE2E2'}; color: ${isComplete ? '#065F46' : '#991B1B'}; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">
+                                    ${isComplete ? '✅ Completo' : '⏳ Incompleto'}
+                                </span>
+                            </div>
+                        </div>`;
+                    }
+                });
+                
+                if (!html) {
+                    html = '<div class="empty">Sin respuestas aún</div>';
+                }
+            } else {
+                html = '<div class="empty">Sin asignaciones</div>';
+            }
+            
+            div.innerHTML = html;
+        } catch (e) {
+            console.error('Error:', e);
+        }
+    }
+    
+    async function showGradeModal(practId, blockId, practName, blockName) {
+        try {
+            const { data: activities } = await db.from('activities').select('*').eq('block_id', blockId).order('activity_number');
+            const { data: responses } = await db.from('activity_responses').select('*').eq('participant_id', practId).in('activity_id', activities.map(a => a.id));
+            const { data: rubrics } = await db.from('rubric_levels').select('*').in('activity_id', activities.map(a => a.id));
+            const { data: grades } = await db.from('activity_grades').select('*').eq('participant_id', practId).in('activity_id', activities.map(a => a.id));
+            
+            const modal = document.createElement('div');
+            modal.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; overflow-y: auto;`;
+            
+            let formHtml = `<div style="background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 900px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); margin: 20px auto;">
+                <h3 style="margin-bottom: 10px; color: #333;">Calificar: ${practName}</h3>
+                <p style="color: #777; margin-bottom: 25px;"><strong>${blockName}</strong> (Total: ${activities.reduce((sum, a) => sum + a.max_points, 0)} puntos)</p>`;
+            
+            let totalPoints = 0;
+            
+            activities.forEach((act, idx) => {
+                const response = responses?.find(r => r.activity_id === act.id);
+                const grade = grades?.find(g => g.activity_id === act.id);
+                const activityRubrics = rubrics?.filter(r => r.activity_id === act.id) || [];
+                const activityId = act.id;
+                
+                formHtml += `<div style="margin-bottom: 25px; padding: 20px; background: #F5F5FA; border-radius: 8px; border-left: 4px solid #E94D9A;">
+                    <strong style="display: block; margin-bottom: 12px; color: #333; font-size: 1.05em;">Actividad ${act.activity_number}: ${act.activity_name} (${act.max_points} pts)</strong>
+                    
+                    <div style="display: flex; gap: 20px; margin-bottom: 15px;">
+                        <div style="flex: 0 0 250px;">
+                            <p style="font-size: 0.9em; color: #666; margin-bottom: 8px;"><strong>PDF Enviado:</strong></p>
+                            ${response?.pdf_url ? `<a href="${response.pdf_url}" target="_blank" style="color: #404469; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                                <svg style="width: 14px; height: 14px;" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-8-6z"/></svg>
+                                📄 Ver PDF
+                            </a>` : '<span style="color: #999;">Sin enviar</span>'}
+                        </div>
+                        <div style="flex: 1;">
+                            <p style="font-size: 0.9em; color: #666; margin-bottom: 8px;"><strong>Selecciona Nivel:</strong></p>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px;">`;
+                
+                activityRubrics.forEach(rubric => {
+                    const isSelected = grade?.rubric_level_id === rubric.id;
+                    const pointsText = rubric.points_min === rubric.points_max 
+                        ? `${rubric.points_max}` 
+                        : `${rubric.points_min}-${rubric.points_max}`;
+                    
+                    formHtml += `<label style="display: flex; align-items: center; padding: 10px; border: 2px ${isSelected ? 'solid #E94D9A' : 'solid #ddd'}; border-radius: 6px; cursor: pointer; background: ${isSelected ? '#fff5fb' : 'white'};">
+                        <input type="radio" name="rubric_${activityId}" value="${rubric.id}" ${isSelected ? 'checked' : ''} onchange="updateRubricSelection(${activityId}, ${rubric.id}, ${rubric.points_max})" style="margin-right: 8px; cursor: pointer;">
+                        <div style="font-size: 0.8em;">
+                            <strong>${rubric.level_name}</strong><br>
+                            <span style="color: #666;">${pointsText} pts</span>
+                        </div>
+                    </label>`;
+                });
+                
+                formHtml += `
+                            </div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="points_${activityId}" value="${grade?.points_awarded || 0}">
+                </div>`;
+            });
+            
+            formHtml += `<div style="background: #E8F5E9; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #333; font-weight: 600;">TOTAL PUNTOS ASIGNADOS:</span>
+                <span id="totalScore" style="font-size: 1.3em; font-weight: 700; color: #059669;">0</span>
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" style="padding: 10px 20px; background: #ddd; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">Cancelar</button>
+                <button id="btnSaveGrades" style="padding: 10px 20px; background: #059669; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">✅ Guardar Calificaciones</button>
+            </div></div>`;
+            
+            modal.innerHTML = formHtml;
+            document.body.appendChild(modal);
+            
+            // Actualizar total inicial
+            updateTotalScore(activities);
+            
+            document.getElementById('btnSaveGrades').onclick = async function() {
+                const scores = {};
+                activities.forEach(act => {
+                    const rubricId = document.querySelector(`input[name="rubric_${act.id}"]:checked`)?.value;
+                    const points = document.getElementById(`points_${act.id}`).value;
+                    if (rubricId) {
+                        scores[act.id] = { rubric_level_id: parseInt(rubricId), points: parseFloat(points) };
+                    }
+                });
+                
+                modal.remove();
+                await saveActivityGrades(practId, scores);
+            };
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    }
+    
+    function updateRubricSelection(activityId, rubricId, points) {
+        document.getElementById(`points_${activityId}`).value = points;
+        updateTotalScore(null);
+    }
+    
+    function updateTotalScore(activities) {
+        let total = 0;
+        const allInputs = document.querySelectorAll('input[type="hidden"][id^="points_"]');
+        allInputs.forEach(input => {
+            total += parseFloat(input.value) || 0;
+        });
+        const totalEl = document.getElementById('totalScore');
+        if (totalEl) {
+            totalEl.textContent = total.toFixed(1);
+        }
+    }
+    
+    async function saveActivityGrades(practId, scores) {
+        try {
+            let blockTotal = 0;
+            
+            for (const [activityId, gradeData] of Object.entries(scores)) {
+                await db.from('activity_grades').upsert({
+                    participant_id: practId,
+                    activity_id: parseInt(activityId),
+                    rubric_level_id: gradeData.rubric_level_id,
+                    points_awarded: gradeData.points,
+                    graded_at: new Date().toISOString()
+                });
+                blockTotal += gradeData.points;
+            }
+            
+            alert(`✅ Calificaciones guardadas\n\nTotal del bloque: ${blockTotal.toFixed(1)} puntos`);
+            await loadGrade();
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
     }
     
     function goSection(id) {
@@ -905,13 +1280,15 @@
         document.getElementById(id).classList.add('active');
         document.querySelectorAll('.sidebarItem').forEach(i => i.classList.remove('active'));
         event.target.classList.add('active');
-        const titles = { dash: 'Dashboard', pract: 'Participantes', mods: 'Módulos', eval: 'Mis Evaluaciones', prof: 'Mi Perfil', config: 'Configuración' };
+        const titles = { dash: 'Dashboard', pract: 'Participantes', mods: 'Módulos', eval: 'Mis Evaluaciones', prof: 'Mi Perfil', grade: 'Calificaciones', config: 'Configuración' };
         document.getElementById('pageTitle').textContent = titles[id] || 'Portal';
         
         if (id === 'config') {
             loadConfig();
         } else if (id === 'eval') {
             loadEvals();
+        } else if (id === 'grade') {
+            loadGrade();
         }
     }
     
