@@ -134,7 +134,9 @@
 
 <div id="app" class="app">
     <div class="sidebar">
-        <div class="sidebarLogo">IMPULSA RH</div>
+        <div class="sidebarLogo">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw0pVAAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAHWSURBVHic7dkxaiMxDAbg70vgJ/AjuAjcxRXk7uCa3F1SuDiY9jgwWF9hwWBhwZxhGYaBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgf/wA+H0Ub8xyL5pAAAAAElFTkSuQmCC" alt="IMPULSA RH" style="height: 40px; object-fit: contain;">
+        </div>
         <div id="adminMenu" class="sidebarSection">
             <div class="sidebarTitle">Menú Admin</div>
             <div class="sidebarItem active" onclick="goSection('dash')">Dashboard</div>
@@ -368,24 +370,38 @@
         tb.innerHTML = '';
         
         if (data?.length) {
-            data.forEach(p => {
+            // Separar activos e inactivos
+            const activos = data.filter(p => p.is_active);
+            const inactivos = data.filter(p => !p.is_active);
+            const ordenados = [...activos, ...inactivos];
+            
+            ordenados.forEach(p => {
                 const btnColor = p.is_active ? '#059669' : '#999999';
                 const btnText = p.is_active ? 'Desactivar' : 'Activar';
+                
+                let botonesHTML = `
+                    <button class="btn" style="background: ${btnColor}; padding: 6px 10px; font-size: 0.8em; margin-right: 4px;" onclick="togglePractState('${p.id}', ${!p.is_active})">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+                        ${btnText}
+                    </button>
+                    <button class="btn" style="background: #404469; padding: 6px 10px; font-size: 0.8em; margin-right: 4px;" onclick="showPractChangePasswordModal('${p.id}', '${p.username}', '${p.first_name} ${p.last_name}')">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        Contraseña
+                    </button>`;
+                
+                // Agregar botón eliminar solo si está inactivo
+                if (!p.is_active) {
+                    botonesHTML += `<button class="btn" style="background: #DC2626; padding: 6px 10px; font-size: 0.8em;" onclick="deletePractitioner('${p.id}', '${p.first_name} ${p.last_name}')">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-9l-1 1H5v2h14V4z"/></svg>
+                        Eliminar
+                    </button>`;
+                }
                 
                 tb.innerHTML += `<tr>
                     <td><strong>${p.first_name} ${p.last_name}</strong></td>
                     <td>${p.username}</td>
                     <td><span class="badge ${p.is_active ? 'badge-active' : 'badge-inactive'}">${p.is_active ? 'Activo' : 'Inactivo'}</span></td>
-                    <td>
-                        <button class="btn" style="background: ${btnColor}; padding: 6px 10px; font-size: 0.8em; margin-right: 4px;" onclick="togglePractState('${p.id}', ${!p.is_active})">
-                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
-                            ${btnText}
-                        </button>
-                        <button class="btn" style="background: #404469; padding: 6px 10px; font-size: 0.8em;" onclick="showPractChangePasswordModal('${p.id}', '${p.username}', '${p.first_name} ${p.last_name}')">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                            Contraseña
-                        </button>
-                    </td>
+                    <td>${botonesHTML}</td>
                 </tr>`;
             });
         } else {
@@ -426,6 +442,33 @@
             await loadDash();
         } catch (e) {
             alert('Error: ' + e.message);
+        }
+    }
+    
+    async function deletePractitioner(practId, practName) {
+        if (!confirm(`⚠️ ¿Eliminar a ${practName}?\n\nEsta acción NO se puede deshacer.`)) {
+            return;
+        }
+        
+        try {
+            // Eliminar de practitioners
+            const { error: errPract } = await db.from('practitioners').delete().eq('id', practId);
+            
+            if (errPract) {
+                alert('Error: ' + errPract.message);
+                return;
+            }
+            
+            // Eliminar de participant_assignments
+            await db.from('participant_assignments').delete().eq('participant_id', practId);
+            
+            alert(`✅ ${practName} eliminado correctamente`);
+            await loadPractTable();
+            await loadDash();
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    }
         }
     }
     
@@ -559,21 +602,37 @@
                 return;
             }
             
-            const { error: errPract } = await db.from('practitioners').insert({
+            const { data: newPract, error: errPract } = await db.from('practitioners').insert({
                 user_id: newUser[0].id,
                 first_name: name,
                 last_name: lname,
                 username: uname,
                 email: `${uname}@impulsa.local`,
                 is_active: true
-            });
+            }).select();
             
-            if (errPract) {
-                alert('Error: ' + errPract.message);
+            if (errPract || !newPract?.length) {
+                alert('Error: ' + (errPract?.message || 'No se pudo crear practicante'));
                 return;
             }
             
-            alert(`✅ Participante Creado\n\nUsuario: ${uname}\nContraseña: ${pwd}`);
+            const practId = newPract[0].id;
+            
+            // Obtener TODOS los bloques publicados
+            const { data: allBlocks } = await db.from('blocks').select('id').eq('is_published', true);
+            
+            if (allBlocks?.length > 0) {
+                // Asignar automáticamente TODOS los bloques al nuevo participante
+                const assignments = allBlocks.map(block => ({
+                    participant_id: practId,
+                    block_id: block.id,
+                    status: 'assigned'
+                }));
+                
+                await db.from('participant_assignments').insert(assignments);
+            }
+            
+            alert(`✅ Participante Creado\n\nNombre: ${name} ${lname}\nUsuario: ${uname}\nContraseña: ${pwd}\n\n✅ Todos los módulos asignados automáticamente`);
             await loadPractTable();
             await loadDash();
         } catch (e) {
@@ -1134,18 +1193,29 @@
     async function loadGrade() {
         try {
             const { data: assignments } = await db.from('participant_assignments').select('participant_id, block_id');
-            const { data: practs } = await db.from('practitioners').select('*').order('first_name');
+            const { data: practs } = await db.from('practitioners').select('*').order('is_active', { ascending: false }).order('first_name');
             const { data: blocks } = await db.from('blocks').select('*');
             const { data: activities } = await db.from('activities').select('*');
             const { data: responses } = await db.from('activity_responses').select('*');
             
             const div = document.getElementById('gradeContainer');
             let html = '';
+            let lastWasActive = true;
             
             if (assignments?.length) {
                 const uniqueCombos = [...new Set(assignments.map(a => `${a.participant_id}|${a.block_id}`))];
                 
-                uniqueCombos.forEach(combo => {
+                // Ordenar combos por estado del participante (activos primero)
+                const sortedCombos = uniqueCombos.sort((a, b) => {
+                    const practA = practs.find(p => p.id === a.split('|')[0]);
+                    const practB = practs.find(p => p.id === b.split('|')[0]);
+                    if (practA.is_active !== practB.is_active) {
+                        return practB.is_active - practA.is_active; // activos primero
+                    }
+                    return practA.first_name.localeCompare(practB.first_name);
+                });
+                
+                sortedCombos.forEach(combo => {
                     const [practId, blockId] = combo.split('|');
                     const pract = practs.find(p => p.id === practId);
                     const block = blocks.find(b => b.id === parseInt(blockId));
@@ -1154,13 +1224,21 @@
                     
                     if (blockActivities.length > 0) {
                         const isComplete = practResponses.length === blockActivities.length;
-                        html += `<div style="background: #F5F5FA; padding: 15px; border-radius: 8px; margin-bottom: 15px; cursor: pointer;" onclick="showGradeModal('${practId}', ${blockId}, '${pract.first_name} ${pract.last_name}', '${block.name}')">
+                        
+                        // Agregar separador entre activos e inactivos
+                        if (lastWasActive && !pract.is_active) {
+                            html += '<div style="border-top: 2px solid #E94D9A; margin: 20px 0 15px 0; padding-top: 15px;"><p style="color: #666; font-weight: 600; font-size: 0.9em;">── PARTICIPANTES INACTIVOS ──</p></div>';
+                        }
+                        lastWasActive = pract.is_active;
+                        
+                        const badgeStyle = pract.is_active ? 'background: #D1FAE5; color: #065F46;' : 'background: #FEE2E2; color: #991B1B;';
+                        html += `<div style="background: #F5F5FA; padding: 15px; border-radius: 8px; margin-bottom: 15px; cursor: pointer; ${!pract.is_active ? 'opacity: 0.6;' : ''}" onclick="showGradeModal('${practId}', ${blockId}, '${pract.first_name} ${pract.last_name}', '${block.name}')">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <div>
                                     <strong>${pract.first_name} ${pract.last_name}</strong><br>
                                     <span style="color: #777; font-size: 0.9em;">${block.name} • ${practResponses.length}/${blockActivities.length} actividades respondidas</span>
                                 </div>
-                                <span style="background: ${isComplete ? '#D1FAE5' : '#FEE2E2'}; color: ${isComplete ? '#065F46' : '#991B1B'}; padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">
+                                <span style="${badgeStyle} padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">
                                     ${isComplete ? '✅ Completo' : '⏳ Incompleto'}
                                 </span>
                             </div>
