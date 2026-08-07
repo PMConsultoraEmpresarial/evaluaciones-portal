@@ -958,6 +958,7 @@
     async function loadEvals() {
         try {
             const { data: practData } = await db.from('practitioners').select('id').eq('user_id', currentUser.id).single();
+            console.log('👤 Practitioner Data:', practData);
             
             if (!practData) {
                 document.getElementById('evalContainer').innerHTML = '<div class="empty">Error cargando datos</div>';
@@ -967,6 +968,7 @@
             const { data: assignments } = await db.from('participant_assignments')
                 .select('block_id')
                 .eq('participant_id', practData.id);
+            console.log('📋 Assignments:', assignments);
             
             if (!assignments?.length) {
                 document.getElementById('evalContainer').innerHTML = '<div class="empty">No tienes módulos asignados aún</div>';
@@ -974,9 +976,16 @@
             }
             
             const blockIds = assignments.map(a => a.block_id);
+            console.log('🎯 Block IDs:', blockIds);
+            
             const { data: blocks } = await db.from('blocks').select('*').in('id', blockIds).order('module_id');
+            console.log('📦 Blocks:', blocks);
+            
             const { data: activities } = await db.from('activities').select('*').in('block_id', blockIds).order('block_id, activity_number');
+            console.log('✏️ Activities:', activities);
+            
             const { data: mods } = await db.from('modules').select('*').order('order_number');
+            console.log('📚 Modules:', mods);
             
             const div = document.getElementById('evalContainer');
             div.innerHTML = '';
