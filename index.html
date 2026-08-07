@@ -403,7 +403,7 @@
                                     </span>
                                 </div>
                                 <div style="display: flex; gap: 8px;">
-                                    ${hasResponse ? `<button class="btn" style="background: #3B82F6; padding: 6px 12px; font-size: 0.8em; flex: 1;" onclick="window.open('${response.file_url}', '_blank')">
+                                    ${hasResponse ? `<button class="btn" style="background: #3B82F6; padding: 6px 12px; font-size: 0.8em; flex: 1;" onclick="window.open('${response.pdf_url}', '_blank')">
                                         📄 Ver PDF
                                     </button>` : `<button class="btn" style="background: #999; padding: 6px 12px; font-size: 0.8em; flex: 1; cursor: not-allowed;" disabled>Sin PDF</button>`}
                                     <button class="btn" style="background: #E94D9A; padding: 6px 12px; font-size: 0.8em; flex: 1;" onclick="showGradeModal('${p.id}', ${a.block_id}, '${p.first_name} ${p.last_name}', '${block.name}', ${act.id})">
@@ -1187,7 +1187,7 @@
             const { data: insertData, error: insertError } = await db.from('activity_responses').upsert({
                 participant_id: practData.id,
                 activity_id: activityId,
-                file_url: publicUrl
+                pdf_url: publicUrl
             });
             
             console.log('DB Insert Result:', { insertData, insertError });
