@@ -1191,64 +1191,225 @@
     async function loadGrade() {
         try {
             const { data: assignments } = await db.from('participant_assignments').select('participant_id, block_id');
-            const { data: practs } = await db.from('practitioners').select('*').order('is_active', { ascending: false }).order('first_name');
+            const { data: practs } = await db.from('practitioners').select('*').where('is_active', 'eq', true).order('first_name');
+            const { data: blocks } = await db.from('blocks').select('*');
+            const { data: activities } = await db.from('activities').select('*');
+            const { data: responses } = await db.from('activity_responses').select('*');
+            
+            const div = document.getElementById('gradeContainer');
+            
+            // Crear input de búsqueda si no existe
+            if (!document.getElementById('searchGradePract')) {
+                const searchDiv = document.createElement('div');
+                searchDiv.style.cssText = 'margin-bottom: 20px;';
+                searchDiv.innerHTML = `
+                    <input type="text" id="searchGradePract" placeholder="🔍 Buscar participante..." 
+                    style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 0.95em;">
+                `;
+                div.parentElement.insertBefore(searchDiv, div);
+                
+                document.getElementById('searchGradePract').addEventListener('keyup', filterGradePract);
+            }
+            
+            let html = '';
+            
+            if (practs?.length && assignments?.length) {
+                // Agrupar por participante
+                const practGroups = {};
+                
+                practs.forEach(p => {
+                    const practAssignments = assignments.filter(a => a.participant_id === p.id);
+                    
+                    if (practAssignments.length > 0) {
+                        practGroups[p.id] = {
+                            pract: p,
+                            evaluations: []
+                        };
+                        
+                        practAssignments.forEach(a => {
+                            const block = blocks.find(b => b.id === a.block_id);
+                            const blockActivities = activities.filter(act => act.block_id === a.block_id);
+                            const practResponses = responses.filter(r => r.participant_id === p.id && blockActivities.map(act => act.id).includes(r.activity_id));
+                            
+                            if (blockActivities.length > 0) {
+                                const isComplete = practResponses.length === blockActivities.length;
+                                practGroups[p.id].evaluations.push({
+                                    block,
+                                    blockActivities,
+                                    practResponses,
+                                    isComplete
+                                });
+                            }
+                        });
+                    }
+                });
+                
+                // Renderizar como dropdowns
+                Object.keys(practGroups).forEach(practId => {
+                    const group = practGroups[practId];
+                    const pract = group.pract;
+                    const uniqueId = `grade-${practId}`;
+                    const totalComplete = group.evaluations.filter(e => e.isComplete).length;
+                    const totalEvals = group.evaluations.length;
+                    
+                    html += `
+                    <div style="background: #F5F5FA; border-radius: 8px; margin-bottom: 12px; overflow: hidden;">
+                        <div style="padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleGradeDropdown('${uniqueId}')">
+                            <div>
+                                <strong style="font-size: 1.05em;">${pract.first_name} ${pract.last_name}</strong>
+                                <span style="color: #777; font-size: 0.9em; margin-left: 10px;">${totalComplete}/${totalEvals} bloques completados</span>
+                            </div>
+                            <span style="color: #404469; font-weight: 600; font-size: 1.2em;" id="arrow-${uniqueId}">▶</span>
+                        </div>
+                        <div id="${uniqueId}" style="display: none; background: white; border-top: 1px solid #E5E5EA;">
+                    `;
+                    
+                    group.evaluations.forEach((eval) => {
+                        const isComplete = eval.isComplete;
+                        html += `
+                            <div style="padding: 12px 15px; border-bottom: 1px solid #F0F0F0; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="showGradeModal('${practId}', ${eval.block.id}, '${pract.first_name} ${pract.last_name}', '${eval.block.name}')">
+                                <div>
+                                    <span style="font-weight: 500;">${eval.block.name}</span><br>
+                                    <span style="color: #777; font-size: 0.85em;">${eval.practResponses.length}/${eval.blockActivities.length} actividades</span>
+                                </div>
+                                <span style="background: ${isComplete ? '#D1FAE5' : '#FEE2E2'}; color: ${isComplete ? '#065F46' : '#991B1B'}; padding: 4px 10px; border-radius: 12px; font-size: 0.8em; font-weight: 600;">
+                                    ${isComplete ? '✅' : '⏳'}
+                                </span>
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                        </div>
+                    </div>
+                    `;
+                });
+                
+                if (!html) {
+                    html = '<div class="empty">Sin evaluaciones aún</div>';
+                }
+            } else {
+                html = '<div class="empty">Sin participantes activos o asignaciones</div>';
+            }
+            
+            div.innerHTML = html;
+        } catch (e) {
+            console.error('Error:', e);
+        }
+    }
+    
+    function toggleGradeDropdown(uniqueId) {
+        const container = document.getElementById(uniqueId);
+        const arrow = document.getElementById(`arrow-${uniqueId}`);
+        
+        if (container.style.display === 'none') {
+            container.style.display = 'block';
+            arrow.textContent = '▼';
+        } else {
+            container.style.display = 'none';
+            arrow.textContent = '▶';
+        }
+    }
+    
+    async function filterGradePract() {
+        const search = document.getElementById('searchGradePract')?.value.toLowerCase().trim() || '';
+        
+        if (!search) {
+            await loadGrade();
+            return;
+        }
+        
+        try {
+            const { data: assignments } = await db.from('participant_assignments').select('participant_id, block_id');
+            const { data: practs } = await db.from('practitioners').select('*').where('is_active', 'eq', true).order('first_name');
             const { data: blocks } = await db.from('blocks').select('*');
             const { data: activities } = await db.from('activities').select('*');
             const { data: responses } = await db.from('activity_responses').select('*');
             
             const div = document.getElementById('gradeContainer');
             let html = '';
-            let lastWasActive = true;
             
-            if (assignments?.length) {
-                const uniqueCombos = [...new Set(assignments.map(a => `${a.participant_id}|${a.block_id}`))];
+            const filteredPracts = practs.filter(p => 
+                p.first_name.toLowerCase().includes(search) || 
+                p.last_name.toLowerCase().includes(search) ||
+                p.username.toLowerCase().includes(search)
+            );
+            
+            if (filteredPracts?.length && assignments?.length) {
+                const practGroups = {};
                 
-                // Ordenar combos por estado del participante (activos primero)
-                const sortedCombos = uniqueCombos.sort((a, b) => {
-                    const practA = practs.find(p => p.id === a.split('|')[0]);
-                    const practB = practs.find(p => p.id === b.split('|')[0]);
-                    if (practA.is_active !== practB.is_active) {
-                        return practB.is_active - practA.is_active; // activos primero
+                filteredPracts.forEach(p => {
+                    const practAssignments = assignments.filter(a => a.participant_id === p.id);
+                    
+                    if (practAssignments.length > 0) {
+                        practGroups[p.id] = {
+                            pract: p,
+                            evaluations: []
+                        };
+                        
+                        practAssignments.forEach(a => {
+                            const block = blocks.find(b => b.id === a.block_id);
+                            const blockActivities = activities.filter(act => act.block_id === a.block_id);
+                            const practResponses = responses.filter(r => r.participant_id === p.id && blockActivities.map(act => act.id).includes(r.activity_id));
+                            
+                            if (blockActivities.length > 0) {
+                                const isComplete = practResponses.length === blockActivities.length;
+                                practGroups[p.id].evaluations.push({
+                                    block,
+                                    blockActivities,
+                                    practResponses,
+                                    isComplete
+                                });
+                            }
+                        });
                     }
-                    return practA.first_name.localeCompare(practB.first_name);
                 });
                 
-                sortedCombos.forEach(combo => {
-                    const [practId, blockId] = combo.split('|');
-                    const pract = practs.find(p => p.id === practId);
-                    const block = blocks.find(b => b.id === parseInt(blockId));
-                    const blockActivities = activities.filter(a => a.block_id === parseInt(blockId));
-                    const practResponses = responses.filter(r => r.participant_id === practId && blockActivities.map(a => a.id).includes(r.activity_id));
+                Object.keys(practGroups).forEach(practId => {
+                    const group = practGroups[practId];
+                    const pract = group.pract;
+                    const uniqueId = `grade-${practId}`;
+                    const totalComplete = group.evaluations.filter(e => e.isComplete).length;
+                    const totalEvals = group.evaluations.length;
                     
-                    if (blockActivities.length > 0) {
-                        const isComplete = practResponses.length === blockActivities.length;
-                        
-                        // Agregar separador entre activos e inactivos
-                        if (lastWasActive && !pract.is_active) {
-                            html += '<div style="border-top: 2px solid #E94D9A; margin: 20px 0 15px 0; padding-top: 15px;"><p style="color: #666; font-weight: 600; font-size: 0.9em;">── PARTICIPANTES INACTIVOS ──</p></div>';
-                        }
-                        lastWasActive = pract.is_active;
-                        
-                        const badgeStyle = pract.is_active ? 'background: #D1FAE5; color: #065F46;' : 'background: #FEE2E2; color: #991B1B;';
-                        html += `<div style="background: #F5F5FA; padding: 15px; border-radius: 8px; margin-bottom: 15px; cursor: pointer; ${!pract.is_active ? 'opacity: 0.6;' : ''}" onclick="showGradeModal('${practId}', ${blockId}, '${pract.first_name} ${pract.last_name}', '${block.name}')">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                    html += `
+                    <div style="background: #F5F5FA; border-radius: 8px; margin-bottom: 12px; overflow: hidden;">
+                        <div style="padding: 15px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="toggleGradeDropdown('${uniqueId}')">
+                            <div>
+                                <strong style="font-size: 1.05em;">${pract.first_name} ${pract.last_name}</strong>
+                                <span style="color: #777; font-size: 0.9em; margin-left: 10px;">${totalComplete}/${totalEvals} bloques completados</span>
+                            </div>
+                            <span style="color: #404469; font-weight: 600; font-size: 1.2em;" id="arrow-${uniqueId}">▶</span>
+                        </div>
+                        <div id="${uniqueId}" style="display: none; background: white; border-top: 1px solid #E5E5EA;">
+                    `;
+                    
+                    group.evaluations.forEach((eval) => {
+                        const isComplete = eval.isComplete;
+                        html += `
+                            <div style="padding: 12px 15px; border-bottom: 1px solid #F0F0F0; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onclick="showGradeModal('${practId}', ${eval.block.id}, '${pract.first_name} ${pract.last_name}', '${eval.block.name}')">
                                 <div>
-                                    <strong>${pract.first_name} ${pract.last_name}</strong><br>
-                                    <span style="color: #777; font-size: 0.9em;">${block.name} • ${practResponses.length}/${blockActivities.length} actividades respondidas</span>
+                                    <span style="font-weight: 500;">${eval.block.name}</span><br>
+                                    <span style="color: #777; font-size: 0.85em;">${eval.practResponses.length}/${eval.blockActivities.length} actividades</span>
                                 </div>
-                                <span style="${badgeStyle} padding: 6px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 600;">
-                                    ${isComplete ? '✅ Completo' : '⏳ Incompleto'}
+                                <span style="background: ${isComplete ? '#D1FAE5' : '#FEE2E2'}; color: ${isComplete ? '#065F46' : '#991B1B'}; padding: 4px 10px; border-radius: 12px; font-size: 0.8em; font-weight: 600;">
+                                    ${isComplete ? '✅' : '⏳'}
                                 </span>
                             </div>
-                        </div>`;
-                    }
+                        `;
+                    });
+                    
+                    html += `
+                        </div>
+                    </div>
+                    `;
                 });
                 
                 if (!html) {
-                    html = '<div class="empty">Sin respuestas aún</div>';
+                    html = '<div class="empty">Sin resultados para la búsqueda</div>';
                 }
             } else {
-                html = '<div class="empty">Sin asignaciones</div>';
+                html = '<div class="empty">Sin participantes activos o asignaciones</div>';
             }
             
             div.innerHTML = html;
