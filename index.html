@@ -358,7 +358,7 @@
             const { data: responses } = await db.from('activity_responses').select('*');
             const { data: grades } = await db.from('activity_grades').select('*');
             
-            const div = document.getElementById('practTable')?.parentElement || document.getElementById('pract');
+            const div = document.getElementById('practTable');
             let html = '';
             
             if (practs?.length && assignments?.length) {
