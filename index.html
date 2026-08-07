@@ -351,7 +351,7 @@
     
     async function loadPractTable() {
         try {
-            const { data: practs } = await db.from('practitioners').select('*').where('is_active', 'eq', true).order('first_name');
+            const { data: practs } = await db.from('practitioners').select('*').eq('is_active', true).order('first_name');
             const { data: assignments } = await db.from('participant_assignments').select('participant_id, block_id');
             const { data: blocks } = await db.from('blocks').select('*');
             const { data: activities } = await db.from('activities').select('*');
@@ -1212,7 +1212,7 @@
     async function loadGrade() {
         try {
             const { data: assignments } = await db.from('participant_assignments').select('participant_id, block_id');
-            const { data: practs } = await db.from('practitioners').select('*').where('is_active', 'eq', true).order('first_name');
+            const { data: practs } = await db.from('practitioners').select('*').eq('is_active', true).order('first_name');
             const { data: blocks } = await db.from('blocks').select('*');
             const { data: activities } = await db.from('activities').select('*');
             const { data: responses } = await db.from('activity_responses').select('*');
