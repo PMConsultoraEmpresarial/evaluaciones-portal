@@ -645,21 +645,7 @@
             
             const practId = newPract[0].id;
             
-            // Obtener TODOS los bloques publicados
-            const { data: allBlocks } = await db.from('blocks').select('id').eq('is_published', true);
-            
-            if (allBlocks?.length > 0) {
-                // Asignar automáticamente TODOS los bloques al nuevo participante
-                const assignments = allBlocks.map(block => ({
-                    participant_id: practId,
-                    block_id: block.id,
-                    status: 'assigned'
-                }));
-                
-                await db.from('participant_assignments').insert(assignments);
-            }
-            
-            alert(`✅ Participante Creado\n\nNombre: ${name} ${lname}\nUsuario: ${uname}\nContraseña: ${pwd}\n\n✅ Todos los módulos asignados automáticamente`);
+            alert(`✅ Participante Creado\n\nNombre: ${name} ${lname}\nUsuario: ${uname}\nContraseña: ${pwd}\n\n📌 Ahora asigna los módulos en Configuración`);
             await loadPractTable();
             await loadConfigPractitioners();
             await loadDash();
