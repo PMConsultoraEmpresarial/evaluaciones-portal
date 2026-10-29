@@ -1155,7 +1155,7 @@
             const { data, error } = await db.storage
                 .from('evaluation-responses')
                 .upload(fileName, file, { 
-                    upsert: true,
+                    upsert: false,
                     contentType: 'application/pdf'
                 });
             
@@ -1180,7 +1180,7 @@
                 participant_id: practData.id,
                 activity_id: activityId,
                 pdf_url: publicUrl
-            });
+            }, { onConflict: 'participant_id,activity_id' });
             
             console.log('DB Insert Result:', { insertData, insertError });
             
