@@ -1402,17 +1402,24 @@
             let blockTotal = 0;
             
             for (const [activityId, gradeData] of Object.entries(scores)) {
-                await db.from('activity_grades').upsert({
+                const { error } = await db.from('activity_grades').upsert({
                     participant_id: practId,
                     activity_id: parseInt(activityId),
                     rubric_level_id: gradeData.rubric_level_id,
                     points_awarded: gradeData.points,
                     graded_at: new Date().toISOString()
-                });
+                }, { onConflict: 'participant_id,activity_id' });
+                
+                if (error) {
+                    console.error('Error guardando calificación:', error);
+                    alert(`Error guardando actividad ${activityId}: ${error.message}`);
+                    return;
+                }
                 blockTotal += gradeData.points;
             }
             
             alert(`✅ Calificaciones guardadas\n\nTotal del bloque: ${blockTotal.toFixed(1)} puntos`);
+            await loadPractTable();
             await loadGrade();
         } catch (e) {
             alert('Error: ' + e.message);
